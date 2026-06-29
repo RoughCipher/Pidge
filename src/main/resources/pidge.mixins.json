@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "package": "ru.roughcipher.pidge.mixin",
+  "compatibilityLevel": "JAVA_${java}",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "mixins": [],
+  "client": [],
+  "server": [
+    "server.MinecraftServerMixin",
+    "server.MobMixin",
+    "server.PacketHandlerLoginMixin",
+    "server.PacketHandlerServerMixin",
+    "server.WorldMixin"
+  ]
+}

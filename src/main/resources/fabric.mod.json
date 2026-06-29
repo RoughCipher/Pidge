@@ -1,0 +1,30 @@
+{
+	"schemaVersion": 1,
+	"id": "pidge",
+	"version": "${version}",
+	"name": "Pidge",
+	"description": "null",
+	"authors": [
+		"Mod: RoughCipher"
+	],
+	"contact": {
+		"homepage": "https://github.com/RoughCipher",
+		"sources": "https://github.com/RoughCipher/Pidge",
+		"issues": "https://github.com/RoughCipher/Pidge/issues"
+	},
+	"license": "MIT",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"ru.roughcipher.pidge.Pidge"
+		]
+	},
+	"mixins": [
+		"pidge.mixins.json"
+	],
+	"depends": {
+		"fabricloader": "*",
+		"minecraft": ">=8.0-beta.1",
+		"java": ">=${java}"
+	}
+}
