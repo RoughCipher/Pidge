@@ -2,6 +2,7 @@ package ru.roughcipher.pidge.telegram;
 
 import ru.roughcipher.pidge.Pidge;
 import ru.roughcipher.pidge.config.PidgeConfig;
+import ru.roughcipher.pidge.util.MessageUtils;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.core.net.command.TextFormatting;
 
@@ -13,7 +14,8 @@ public class TelegramChatRelay {
 			Pidge.info("Telegram message received but server not ready: " + author + ": " + message);
 			return;
 		}
-		String formatted = "[" + TextFormatting.LIGHT_BLUE + "T" + TextFormatting.RESET + "] <" + author + "> " + message;
+		String cleanMessage = MessageUtils.cleanForMinecraft(message);
+		String formatted = "[" + TextFormatting.LIGHT_BLUE + "T" + TextFormatting.RESET + "] <" + author + "> " + cleanMessage;
 		Pidge.info(formatted);
 		for (String line : formatted.split("\n")) {
 			server.playerList.sendEncryptedChatToAllPlayers(line);

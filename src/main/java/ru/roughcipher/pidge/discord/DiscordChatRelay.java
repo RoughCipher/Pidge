@@ -15,7 +15,8 @@ public class DiscordChatRelay {
 			Pidge.info("Discord msg (server not ready): " + author + ": " + message);
 			return;
 		}
-		String formatted = "[" + TextFormatting.PURPLE + "D" + TextFormatting.RESET + "] <" + author + "> " + message;
+		String cleanMessage = MessageUtils.cleanForMinecraft(message);
+		String formatted = "[" + TextFormatting.PURPLE + "D" + TextFormatting.RESET + "] <" + author + "> " + cleanMessage;
 		Pidge.info(formatted);
 		for (String line : formatted.split("\n")) {
 			server.playerList.sendEncryptedChatToAllPlayers(line);
