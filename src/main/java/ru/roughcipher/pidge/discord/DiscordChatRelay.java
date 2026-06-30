@@ -7,8 +7,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.core.net.command.TextFormatting;
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 
-import java.util.List;
-
 public class DiscordChatRelay {
 
 	public static void sendToMinecraft(String author, String message) {
@@ -29,8 +27,7 @@ public class DiscordChatRelay {
 		if (channel == null) return;
 
 		String fullMessage = author + ": " + message;
-		List<String> fragments = MessageUtils.splitMessage(fullMessage, 2000);
-		for (String fragment : fragments) {
+		for (String fragment : MessageUtils.splitMessage(fullMessage, 2000)) {
 			channel.sendMessage(fragment).queue();
 		}
 	}
@@ -38,15 +35,14 @@ public class DiscordChatRelay {
 	public static void sendJoinLeaveMessage(String username, boolean joined) {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
-		String text = PidgeConfig.getServerName() + "\n" + username + (joined ? " joined" : " left") + " the server";
+		String text = username + (joined ? " joined" : " left") + " the server";
 		channel.sendMessage(text).queue();
 	}
 
 	public static void sendDeathMessage(String deathMessage) {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
-		String text = PidgeConfig.getServerName() + "\n" + deathMessage;
-		channel.sendMessage(text).queue();
+		channel.sendMessage(deathMessage).queue();
 	}
 
 	public static void sendServerStartMessage() {
@@ -66,7 +62,6 @@ public class DiscordChatRelay {
 	public static void sendServerSleepMessage() {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
-		String text = PidgeConfig.getServerName() + "\nThe Night was Skipped";
-		channel.sendMessage(text).queue();
+		channel.sendMessage("The Night was Skipped").queue();
 	}
 }
