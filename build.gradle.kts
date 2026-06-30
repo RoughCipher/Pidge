@@ -84,8 +84,6 @@ dependencies {
 	include(libs.jackson.databind)
 	implementation(libs.jackson.annotations)
 	include(libs.jackson.annotations)
-	implementation(libs.discordWebhooks)
-	include(libs.discordWebhooks)
 	implementation(libs.json)
 	include(libs.json)
 	implementation(libs.telegramBotApi)

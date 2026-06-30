@@ -48,7 +48,6 @@ trove4j = "3.0.3"
 okio = "3.17.0"
 jackson = "2.22.0"
 jackson_a = "2.22"
-discordWebhooks = "0.8.4"
 json = "20260522"
 # Telegram
 telegramBotApi = "10.1.0"
@@ -78,7 +77,6 @@ okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 jackson-core = { group = "com.fasterxml.jackson.core", name = "jackson-core", version.ref = "jackson" }
 jackson-databind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jackson" }
 jackson-annotations = { group = "com.fasterxml.jackson.core", name = "jackson-annotations", version.ref = "jackson_a" }
-discordWebhooks = { group = "club.minnced", name = "discord-webhooks", version.ref = "discordWebhooks" }
 json = { group = "org.json", name = "json", version.ref = "json" }
 telegramBotApi = { group = "com.github.pengrad", name = "java-telegram-bot-api", version.ref = "telegramBotApi" }
 
