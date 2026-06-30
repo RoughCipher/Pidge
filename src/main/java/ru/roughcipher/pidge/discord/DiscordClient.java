@@ -20,110 +20,106 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public class DiscordClient {
-	public static JDA jda;
-	public static JDAWebhookClient webhook;
-	public static StandardGuildMessageChannel channel;
+    private static volatile JDA jda;
+    private static volatile JDAWebhookClient webhook;
+    private static volatile StandardGuildMessageChannel channel;
+    private static final Object lock = new Object();
 
-	public static boolean init() {
-		if (!PidgeConfig.discord_enable) {
-			return false;
-		}
+    public static boolean init() {
+        if (!PidgeConfig.isDiscordEnabled()) return false;
+        try {
+            JDABuilder builder = JDABuilder.create(
+                    PidgeConfig.getDiscordToken(),
+                    GatewayIntent.GUILD_MESSAGES,
+                    GatewayIntent.MESSAGE_CONTENT,
+                    GatewayIntent.GUILD_WEBHOOKS
+            );
+            builder.disableCache(
+                    net.dv8tion.jda.api.utils.cache.CacheFlag.ACTIVITY,
+                    net.dv8tion.jda.api.utils.cache.CacheFlag.VOICE_STATE,
+                    net.dv8tion.jda.api.utils.cache.CacheFlag.EMOJI,
+                    net.dv8tion.jda.api.utils.cache.CacheFlag.STICKER,
+                    net.dv8tion.jda.api.utils.cache.CacheFlag.SOUNDBOARD_SOUNDS,
+                    net.dv8tion.jda.api.utils.cache.CacheFlag.CLIENT_STATUS,
+                    net.dv8tion.jda.api.utils.cache.CacheFlag.ONLINE_STATUS,
+                    net.dv8tion.jda.api.utils.cache.CacheFlag.SCHEDULED_EVENTS
+            );
+            builder.addEventListeners(new Listener());
+            jda = builder.build().awaitReady();
+            Pidge.LOGGER.info("Discord client started");
+            return true;
+        } catch (Throwable t) {
+            Pidge.LOGGER.error("Discord init failed", t);
+            return false;
+        }
+    }
 
-		try {
-			JDABuilder builder = JDABuilder.create(
-				PidgeConfig.discord_token,
-				GatewayIntent.GUILD_MESSAGES,
-				GatewayIntent.MESSAGE_CONTENT,
-				GatewayIntent.GUILD_WEBHOOKS
-			);
-			builder.addEventListeners(new Listener());
+    public static void shutdown() {
+        if (jda != null) {
+            try { jda.shutdown(); } catch (Exception e) { Pidge.LOGGER.error("JDA shutdown error", e); }
+        }
+        if (webhook != null) {
+            try { webhook.close(); } catch (Exception e) { Pidge.LOGGER.error("Webhook close error", e); }
+        }
+    }
 
-			jda = builder.build().awaitReady();
+    @Nullable
+    public static StandardGuildMessageChannel getChannel() {
+        if (jda == null) return null;
+        if (channel == null) {
+            synchronized (lock) {
+                if (channel == null) {
+                    channel = jda.getChannelById(StandardGuildMessageChannel.class, PidgeConfig.getDiscordChannel());
+                }
+            }
+        }
+        return channel;
+    }
 
-			return true;
-		} catch (Throwable t) {
-			Pidge.LOGGER.error("Unable to start discord bot.", t);
-			return false;
-		}
-	}
+    @Nullable
+    public static JDAWebhookClient getWebhook() {
+        if (webhook != null) return webhook;
+        synchronized (lock) {
+            if (webhook != null) return webhook;
+            StandardGuildMessageChannel ch = getChannel();
+            if (ch == null) {
+                Pidge.LOGGER.warn("Discord channel not found");
+                return null;
+            }
+            try {
+                Optional<Webhook> existing = ch.retrieveWebhooks().complete().stream()
+                        .filter(w -> {
+                            User owner = w.getOwnerAsUser();
+                            return owner != null && owner.getId().equals(jda.getSelfUser().getId());
+                        })
+                        .findFirst();
+                Webhook hook = existing.orElseGet(() -> ch.createWebhook("BTA Chat Link").complete());
+                if (hook == null) {
+                    Pidge.LOGGER.warn("Webhook creation failed");
+                    return null;
+                }
+                webhook = JDAWebhookClient.from(hook);
+                return webhook;
+            } catch (Exception e) {
+                Pidge.LOGGER.error("Webhook error", e);
+                return null;
+            }
+        }
+    }
 
-	public static @Nullable StandardGuildMessageChannel getChannel() {
-		if (jda == null) {
-			return null;
-		}
+    public static class Listener implements EventListener {
+        @Override
+        public void onEvent(@NotNull GenericEvent event) {
+            if (!(event instanceof MessageReceivedEvent)) return;
+            MessageReceivedEvent msg = (MessageReceivedEvent) event;
+            if (msg.isWebhookMessage() || msg.getAuthor().isBot() || msg.getAuthor().isSystem()) return;
+            if (!msg.isFromGuild()) return;
+            if (!msg.getMessage().getChannel().getId().equals(PidgeConfig.getDiscordChannel())) return;
 
-		if (channel == null) {
-			channel = jda.getChannelById(StandardGuildMessageChannel.class, PidgeConfig.discord_channel);
-		}
-
-		return channel;
-	}
-
-	public static @Nullable JDAWebhookClient getWebhook() {
-		if (webhook != null) {
-			return webhook;
-		}
-
-		StandardGuildMessageChannel channel = getChannel();
-
-		if (channel == null) {
-			return null;
-		}
-
-		try {
-			Optional<Webhook> optionalWebhook = channel.retrieveWebhooks().complete().stream().filter((it) -> {
-				User owner = it.getOwnerAsUser();
-				if (owner == null) {
-					return false;
-				}
-				return owner.getId().equals(jda.getSelfUser().getId());
-			}).findFirst();
-
-			Webhook webhook = optionalWebhook.orElseGet(() -> channel.createWebhook("BTA Chat Link").complete());
-
-			if (webhook == null) {
-				return null;
-			}
-
-			DiscordClient.webhook = JDAWebhookClient.from(webhook);
-			return DiscordClient.webhook;
-		} catch (Exception e) {
-			Pidge.LOGGER.error("Failed to get or create webhook", e);
-			return null;
-		}
-	}
-
-	public static class Listener implements EventListener {
-
-		@Override
-		public void onEvent(@NotNull GenericEvent event) {
-			if (event instanceof MessageReceivedEvent) {
-				MessageReceivedEvent message = (MessageReceivedEvent) event;
-
-				if (message.isWebhookMessage() || message.getAuthor().isBot() || message.getAuthor().isSystem()) {
-					return;
-				}
-
-				if (!message.isFromGuild()) {
-					return;
-				}
-
-				if (!message.getMessage().getChannel().getId().equals(PidgeConfig.discord_channel)) {
-					return;
-				}
-
-				User user = message.getAuthor();
-
-				String username = getDisplayName(user);
-				String content = ChatEmotes.process(message.getMessage().getContentStripped());
-
-				DiscordChatRelay.sendToMinecraft(username, content);
-				TelegramChatRelay.sendToTelegram("[D] " + username, content);
-			}
-		}
-
-		public static String getDisplayName(User user) {
-			return user.getName();
-		}
-	}
+            String author = msg.getAuthor().getName();
+            String content = ChatEmotes.process(msg.getMessage().getContentStripped());
+            DiscordChatRelay.sendToMinecraft(author, content);
+            TelegramChatRelay.sendToTelegram("[D] " + author, content);
+        }
+    }
 }

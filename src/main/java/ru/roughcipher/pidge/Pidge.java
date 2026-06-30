@@ -11,35 +11,51 @@ import ru.roughcipher.pidge.telegram.TelegramClient;
 import turniplabs.halplibe.HalpLibe;
 
 public class Pidge implements ModInitializer {
-	public static final String MOD_ID = HalpLibe.registerMod("pidge", true);
-	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static final String MOD_ID = HalpLibe.registerMod("pidge", true);
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    private static volatile boolean shutdownSent = false;
 
-	@Override
-	public void onInitialize() {
-		LOGGER.info("Pidge initializing!");
-		PidgeConfig.printConfigValues();
-		new Thread(() -> {
-			LOGGER.info("Starting Discord client...");
-			if (DiscordClient.init()) {
-				LOGGER.info("Discord client started successfully!");
-				DiscordChatRelay.sendServerStartMessage();
-			} else {
-				LOGGER.warn("Discord client failed to start or is disabled.");
-			}
-		}).start();
-		new Thread(() -> {
-			LOGGER.info("Starting Telegram client...");
-			if (TelegramClient.init()) {
-				LOGGER.info("Telegram client started successfully!");
-				TelegramChatRelay.sendServerStartMessage();
-			} else {
-				LOGGER.warn("Telegram client failed to start or is disabled.");
-			}
-		}).start();
-		LOGGER.info("Pidge initialized!");
-	}
+    @Override
+    public void onInitialize() {
+        LOGGER.info("Pidge initializing!");
+        PidgeConfig.printConfigValues();
 
-	public static void info(String s) {
-		LOGGER.info(s);
-	}
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            if (!shutdownSent) {
+                shutdownSent = true;
+                LOGGER.info("Shutdown hook triggered");
+                sendShutdownMessages();
+            }
+        }));
+
+        new Thread(() -> {
+            if (DiscordClient.init()) {
+                DiscordChatRelay.sendServerStartMessage();
+            }
+        }).start();
+
+        new Thread(() -> {
+            if (TelegramClient.init()) {
+                TelegramChatRelay.sendServerStartMessage();
+            }
+        }).start();
+
+        LOGGER.info("Pidge initialized!");
+    }
+
+    public static void sendShutdownMessages() {
+        try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+        DiscordChatRelay.sendServerStoppedMessage();
+        TelegramChatRelay.sendServerStoppedMessage();
+        DiscordClient.shutdown();
+        TelegramClient.shutdown();
+    }
+
+    public static void markShutdownSent() {
+        shutdownSent = true;
+    }
+
+    public static void info(String s) {
+        LOGGER.info(s);
+    }
 }

@@ -8,85 +8,64 @@ import com.pengrad.telegrambot.request.SendMessage;
 import ru.roughcipher.pidge.Pidge;
 import ru.roughcipher.pidge.config.PidgeConfig;
 import ru.roughcipher.pidge.discord.DiscordChatRelay;
-
-import java.util.ArrayList;
-import java.util.List;
+import ru.roughcipher.pidge.util.MessageUtils;
 
 public class TelegramClient {
-	public static TelegramBot bot;
-	private static boolean initialized = false;
-	private static final int TELEGRAM_CONTENT_LIMIT = 4096;
+    private static TelegramBot bot;
+    private static volatile boolean initialized = false;
 
-	public static boolean init() {
-		if (!PidgeConfig.telegram_enable) {
-			return false;
-		}
+    public static boolean init() {
+        if (!PidgeConfig.isTelegramEnabled()) return false;
+        try {
+            bot = new TelegramBot(PidgeConfig.getTelegramToken());
+            bot.setUpdatesListener(updates -> {
+                for (Update update : updates) {
+                    if (update.message() != null) {
+                        Message message = update.message();
+                        if (message.chat().id().toString().equals(PidgeConfig.getTelegramChatId())) {
+                            String username = message.from().username();
+                            String author = (username != null && !username.isEmpty())
+                                    ? username
+                                    : message.from().firstName() + (message.from().lastName() != null ? " " + message.from().lastName() : "");
+                            String text = message.text();
+                            if (text != null && !text.isEmpty()) {
+                                TelegramChatRelay.sendToMinecraft(author, text);
+                                DiscordChatRelay.sendToDiscord("[T] " + author, text);
+                            }
+                        }
+                    }
+                }
+                return UpdatesListener.CONFIRMED_UPDATES_ALL;
+            });
+            initialized = true;
+            Pidge.LOGGER.info("Telegram client started");
+            return true;
+        } catch (Throwable t) {
+            Pidge.LOGGER.error("Telegram init failed", t);
+            return false;
+        }
+    }
 
-		try {
-			bot = new TelegramBot(PidgeConfig.telegram_token);
-			bot.setUpdatesListener(updates -> {
-				for (Update update : updates) {
-					if (update.message() != null) {
-						Message message = update.message();
-						if (message.chat().id().toString().equals(PidgeConfig.telegram_chat_id)) {
-							String username = message.from().username();
-							String author;
-							if (username != null && !username.isEmpty()) {
-								author = username;
-							} else {
-								author = message.from().firstName() +
-									(message.from().lastName() != null ? " " + message.from().lastName() : "");
-							}
-							String text = message.text();
-							if (text != null && !text.isEmpty()) {
-								TelegramChatRelay.sendToMinecraft(author, text);
-								DiscordChatRelay.sendToDiscord("[T] " + author, text);
-							}
-						}
-					}
-				}
-				return UpdatesListener.CONFIRMED_UPDATES_ALL;
-			});
-			initialized = true;
-			Pidge.LOGGER.info("Telegram bot started successfully!");
-			return true;
-		} catch (Throwable t) {
-			Pidge.LOGGER.error("Unable to start Telegram bot.", t);
-			return false;
-		}
-	}
+    public static void shutdown() {
+        if (bot != null) {
+            try {
+                bot.removeGetUpdatesListener();
+                initialized = false;
+                Pidge.LOGGER.info("Telegram client shut down");
+            } catch (Exception e) {
+                Pidge.LOGGER.error("Telegram shutdown error", e);
+            }
+        }
+    }
 
-	public static boolean isInitialized() {
-		return initialized && bot != null;
-	}
+    public static boolean isInitialized() {
+        return initialized && bot != null;
+    }
 
-	public static void sendMessage(String text) {
-		if (!isInitialized()) return;
-		List<String> fragments = splitMessage(text, TELEGRAM_CONTENT_LIMIT);
-		for (String fragment : fragments) {
-			bot.execute(new SendMessage(PidgeConfig.telegram_chat_id, fragment));
-		}
-	}
-
-	private static List<String> splitMessage(String text, int limit) {
-		List<String> parts = new ArrayList<>();
-		if (text.length() <= limit) {
-			parts.add(text);
-			return parts;
-		}
-		int start = 0;
-		while (start < text.length()) {
-			int end = Math.min(start + limit, text.length());
-			if (end < text.length()) {
-				int lastSpace = text.lastIndexOf(' ', end);
-				if (lastSpace > start) {
-					end = lastSpace;
-				}
-			}
-			parts.add(text.substring(start, end));
-			start = end;
-			while (start < text.length() && text.charAt(start) == ' ') start++;
-		}
-		return parts;
-	}
+    public static void sendMessage(String text) {
+        if (!isInitialized()) return;
+        for (String fragment : MessageUtils.splitMessage(text, 4096)) {
+            bot.execute(new SendMessage(PidgeConfig.getTelegramChatId(), fragment));
+        }
+    }
 }
