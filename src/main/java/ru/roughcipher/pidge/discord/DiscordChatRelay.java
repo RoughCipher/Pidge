@@ -47,7 +47,7 @@ public class DiscordChatRelay {
 		if (channel == null) return;
 		String pattern = I18n.getInstance().translateKey(translationKey);
 		String translated = String.format(pattern, args);
-		String clean = translated.replaceAll("\u00a7.", "");
+		String clean = MessageUtils.stripColorCodes(translated);
 		channel.sendMessage(clean).queue();
 	}
 

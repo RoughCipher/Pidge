@@ -38,4 +38,9 @@ public class MessageUtils {
 		}
 		return sb.toString();
 	}
+
+	public static String stripColorCodes(String text) {
+		if (text == null) return null;
+		return text.replaceAll("\u00a7.", "");
+	}
 }
