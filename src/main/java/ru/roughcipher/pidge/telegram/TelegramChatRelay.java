@@ -36,6 +36,16 @@ public class TelegramChatRelay {
 		TelegramClient.sendMessage(text);
 	}
 
+	public static void sendKickMessage(String username, String reason) {
+		if (!TelegramClient.isInitialized()) return;
+		String pattern = I18n.getInstance().translateKey("messages.player_kicked");
+		String text = String.format(pattern, username);
+		if (reason != null && !reason.isEmpty()) {
+			text += " (" + reason + ")";
+		}
+		TelegramClient.sendMessage(text);
+	}
+
 	public static void sendDeathMessage(String translationKey, Object[] args) {
 		if (!TelegramClient.isInitialized()) return;
 		String pattern = I18n.getInstance().translateKey(translationKey);

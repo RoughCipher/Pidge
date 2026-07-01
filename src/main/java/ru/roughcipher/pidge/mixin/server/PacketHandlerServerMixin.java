@@ -15,36 +15,46 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = PacketHandlerServer.class, remap = false)
 public class PacketHandlerServerMixin {
-    @Shadow private PlayerServer playerEntity;
+	@Shadow private PlayerServer playerEntity;
 
-    @Redirect(
-            method = "handleMessage",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/core/net/ChatEmotes;process(Ljava/lang/String;)Ljava/lang/String;"
-            )
-    )
-    String redirectChatHandle(String s) {
-        String message = ChatEmotes.process(s);
-        String username = playerEntity.username;
+	@Redirect(
+		method = "handleMessage",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/core/net/ChatEmotes;process(Ljava/lang/String;)Ljava/lang/String;"
+		)
+	)
+	String redirectChatHandle(String s) {
+		String message = ChatEmotes.process(s);
+		String username = playerEntity.username;
 
-        if (PidgeConfig.isDiscordEnabled()) {
-            DiscordChatRelay.sendToDiscord(username, message);
-        }
-        if (PidgeConfig.isTelegramEnabled()) {
-            TelegramChatRelay.sendToTelegram(username, message);
-        }
+		if (PidgeConfig.isDiscordEnabled()) {
+			DiscordChatRelay.sendToDiscord(username, message);
+		}
+		if (PidgeConfig.isTelegramEnabled()) {
+			TelegramChatRelay.sendToTelegram(username, message);
+		}
 
-        return message;
-    }
+		return message;
+	}
 
-    @Inject(
-            method = "handleErrorMessage",
-            at = @At("HEAD")
-    )
-    void sendLeaveMessage(String s, Object[] aobj, CallbackInfo ci) {
-        String username = playerEntity.username;
-        DiscordChatRelay.sendJoinLeaveMessage(username, false);
-        TelegramChatRelay.sendJoinLeaveMessage(username, false);
-    }
+	@Inject(
+		method = "handleErrorMessage",
+		at = @At("HEAD")
+	)
+	void sendLeaveMessage(String s, Object[] aobj, CallbackInfo ci) {
+		String username = playerEntity.username;
+		DiscordChatRelay.sendJoinLeaveMessage(username, false);
+		TelegramChatRelay.sendJoinLeaveMessage(username, false);
+	}
+
+	@Inject(
+		method = "kickPlayer",
+		at = @At("HEAD")
+	)
+	void onKickPlayer(String reason, CallbackInfo ci) {
+		String username = playerEntity.username;
+		DiscordChatRelay.sendKickMessage(username, reason);
+		TelegramChatRelay.sendKickMessage(username, reason);
+	}
 }

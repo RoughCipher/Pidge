@@ -42,6 +42,17 @@ public class DiscordChatRelay {
 		channel.sendMessage(text).queue();
 	}
 
+	public static void sendKickMessage(String username, String reason) {
+		StandardGuildMessageChannel channel = DiscordClient.getChannel();
+		if (channel == null) return;
+		String pattern = I18n.getInstance().translateKey("messages.player_kicked");
+		String text = String.format(pattern, username);
+		if (reason != null && !reason.isEmpty()) {
+			text += " (" + reason + ")";
+		}
+		channel.sendMessage(text).queue();
+	}
+
 	public static void sendDeathMessage(String translationKey, Object[] args) {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
