@@ -22,14 +22,10 @@ public abstract class MobMixin {
 		)
 	)
 	private void redirectDeathMessage(World world, TextFormatting.Base color, String translationKey, String[] args) {
-		String pattern = I18n.getInstance().translateKey(translationKey);
-		String translatedMessage = String.format(pattern, (Object[]) args);
-		world.sendGlobalMessage(color + translatedMessage);
-
+		world.sendGlobalMessage(color + String.format(I18n.getInstance().translateKey(translationKey), (Object[]) args));
 		if ((Object) this instanceof Player) {
-			String cleanMessage = translatedMessage.replaceAll("\u00a7.", "");
-			DiscordChatRelay.sendDeathMessage(cleanMessage);
-			TelegramChatRelay.sendDeathMessage(cleanMessage);
+			DiscordChatRelay.sendDeathMessage(translationKey, args);
+			TelegramChatRelay.sendDeathMessage(translationKey, args);
 		}
 	}
 }

@@ -37,6 +37,8 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: build
+        env:
+          TZ: Europe/Moscow
         run: ./gradlew build
 
       - name: Package artifacts into 7z

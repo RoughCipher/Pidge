@@ -1,12 +1,16 @@
 import com.smushytaco.lwjgl_gradle.Preset
 import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.TimeZone
 
 plugins {
 	alias(libs.plugins.loom)
 	alias(libs.plugins.lwjgl)
     java
 }
+
+TimeZone.setDefault(TimeZone.getTimeZone("Europe/Moscow"))
+
 val modVersion: Provider<String> = providers.gradleProperty("mod_version")
 val modGroup: Provider<String> = providers.gradleProperty("mod_group")
 val modName: Provider<String> = providers.gradleProperty("mod_name")

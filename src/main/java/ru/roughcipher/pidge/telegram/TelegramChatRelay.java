@@ -5,6 +5,7 @@ import ru.roughcipher.pidge.config.PidgeConfig;
 import ru.roughcipher.pidge.util.MessageUtils;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.core.net.command.TextFormatting;
+import net.minecraft.core.lang.I18n;
 
 public class TelegramChatRelay {
 
@@ -29,12 +30,18 @@ public class TelegramChatRelay {
 
 	public static void sendJoinLeaveMessage(String username, boolean joined) {
 		if (!TelegramClient.isInitialized()) return;
-		TelegramClient.sendMessage(username + (joined ? " joined" : " left") + " the server");
+		String key = joined ? "messages.player_joined" : "messages.player_left";
+		String pattern = I18n.getInstance().translateKey(key);
+		String text = String.format(pattern, username);
+		TelegramClient.sendMessage(text);
 	}
 
-	public static void sendDeathMessage(String deathMessage) {
+	public static void sendDeathMessage(String translationKey, Object[] args) {
 		if (!TelegramClient.isInitialized()) return;
-		TelegramClient.sendMessage(deathMessage);
+		String pattern = I18n.getInstance().translateKey(translationKey);
+		String translated = String.format(pattern, args);
+		String clean = translated.replaceAll("\u00a7.", "");
+		TelegramClient.sendMessage(clean);
 	}
 
 	public static void sendServerStartMessage() {

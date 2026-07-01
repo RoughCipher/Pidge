@@ -5,6 +5,7 @@ import ru.roughcipher.pidge.config.PidgeConfig;
 import ru.roughcipher.pidge.util.MessageUtils;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.core.net.command.TextFormatting;
+import net.minecraft.core.lang.I18n;
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 
 public class DiscordChatRelay {
@@ -26,7 +27,6 @@ public class DiscordChatRelay {
 	public static void sendToDiscord(String author, String message) {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
-
 		String fullMessage = author + ": " + message;
 		for (String fragment : MessageUtils.splitMessage(fullMessage, 2000)) {
 			channel.sendMessage(fragment).queue();
@@ -36,14 +36,19 @@ public class DiscordChatRelay {
 	public static void sendJoinLeaveMessage(String username, boolean joined) {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
-		String text = username + (joined ? " joined" : " left") + " the server";
+		String key = joined ? "messages.player_joined" : "messages.player_left";
+		String pattern = I18n.getInstance().translateKey(key);
+		String text = String.format(pattern, username);
 		channel.sendMessage(text).queue();
 	}
 
-	public static void sendDeathMessage(String deathMessage) {
+	public static void sendDeathMessage(String translationKey, Object[] args) {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
-		channel.sendMessage(deathMessage).queue();
+		String pattern = I18n.getInstance().translateKey(translationKey);
+		String translated = String.format(pattern, args);
+		String clean = translated.replaceAll("\u00a7.", "");
+		channel.sendMessage(clean).queue();
 	}
 
 	public static void sendServerStartMessage() {
