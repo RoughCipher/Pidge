@@ -3,6 +3,7 @@ package ru.roughcipher.pidge.discord;
 import ru.roughcipher.pidge.Pidge;
 import ru.roughcipher.pidge.config.PidgeConfig;
 import ru.roughcipher.pidge.util.MessageUtils;
+import ru.roughcipher.pidge.util.RelayErrorHandler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.core.net.command.TextFormatting;
 import net.minecraft.core.lang.I18n;
@@ -27,10 +28,8 @@ public class DiscordChatRelay {
 	public static void sendToDiscord(String author, String message) {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
-		String fullMessage = author + ": " + message;
-		for (String fragment : MessageUtils.splitMessage(fullMessage, 2000)) {
-			channel.sendMessage(fragment).queue();
-		}
+		String full = author + ": " + message;
+		RelayErrorHandler.sendToDiscord(channel, full, "chat");
 	}
 
 	public static void sendJoinLeaveMessage(String username, boolean joined) {
@@ -39,7 +38,7 @@ public class DiscordChatRelay {
 		String key = joined ? "messages.player_joined" : "messages.player_left";
 		String pattern = I18n.getInstance().translateKey(key);
 		String text = String.format(pattern, username);
-		channel.sendMessage(text).queue();
+		RelayErrorHandler.sendToDiscord(channel, text, "joinleave");
 	}
 
 	public static void sendKickMessage(String username, String reason) {
@@ -47,10 +46,8 @@ public class DiscordChatRelay {
 		if (channel == null) return;
 		String pattern = I18n.getInstance().translateKey("messages.player_kicked");
 		String text = String.format(pattern, username);
-		if (reason != null && !reason.isEmpty()) {
-			text += " (" + reason + ")";
-		}
-		channel.sendMessage(text).queue();
+		if (reason != null && !reason.isEmpty()) text += " (" + reason + ")";
+		RelayErrorHandler.sendToDiscord(channel, text, "kick");
 	}
 
 	public static void sendDeathMessage(String translationKey, Object[] args) {
@@ -59,26 +56,26 @@ public class DiscordChatRelay {
 		String pattern = I18n.getInstance().translateKey(translationKey);
 		String translated = String.format(pattern, args);
 		String clean = MessageUtils.stripColorCodes(translated);
-		channel.sendMessage(clean).queue();
+		RelayErrorHandler.sendToDiscord(channel, clean, "death");
 	}
 
 	public static void sendServerStartMessage() {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
 		String text = PidgeConfig.getServerName() + "\nServer started!";
-		channel.sendMessage(text).queue();
+		RelayErrorHandler.sendToDiscord(channel, text, "start");
 	}
 
 	public static void sendServerStoppedMessage() {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
 		String text = PidgeConfig.getServerName() + "\nServer stopped!";
-		channel.sendMessage(text).queue();
+		RelayErrorHandler.sendToDiscord(channel, text, "stop");
 	}
 
 	public static void sendServerSleepMessage() {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
-		channel.sendMessage("The Night was Skipped").queue();
+		RelayErrorHandler.sendToDiscord(channel, "The Night was Skipped", "sleep");
 	}
 }

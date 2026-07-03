@@ -3,6 +3,7 @@ package ru.roughcipher.pidge.telegram;
 import ru.roughcipher.pidge.Pidge;
 import ru.roughcipher.pidge.config.PidgeConfig;
 import ru.roughcipher.pidge.util.MessageUtils;
+import ru.roughcipher.pidge.util.RelayErrorHandler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.core.net.command.TextFormatting;
 import net.minecraft.core.lang.I18n;
@@ -24,48 +25,39 @@ public class TelegramChatRelay {
 	}
 
 	public static void sendToTelegram(String author, String message) {
-		if (!TelegramClient.isInitialized()) return;
-		TelegramClient.sendMessage(author + ": " + message);
+		RelayErrorHandler.sendToTelegram(author + ": " + message, "chat");
 	}
 
 	public static void sendJoinLeaveMessage(String username, boolean joined) {
-		if (!TelegramClient.isInitialized()) return;
 		String key = joined ? "messages.player_joined" : "messages.player_left";
 		String pattern = I18n.getInstance().translateKey(key);
 		String text = String.format(pattern, username);
-		TelegramClient.sendMessage(text);
+		RelayErrorHandler.sendToTelegram(text, "joinleave");
 	}
 
 	public static void sendKickMessage(String username, String reason) {
-		if (!TelegramClient.isInitialized()) return;
 		String pattern = I18n.getInstance().translateKey("messages.player_kicked");
 		String text = String.format(pattern, username);
-		if (reason != null && !reason.isEmpty()) {
-			text += " (" + reason + ")";
-		}
-		TelegramClient.sendMessage(text);
+		if (reason != null && !reason.isEmpty()) text += " (" + reason + ")";
+		RelayErrorHandler.sendToTelegram(text, "kick");
 	}
 
 	public static void sendDeathMessage(String translationKey, Object[] args) {
-		if (!TelegramClient.isInitialized()) return;
 		String pattern = I18n.getInstance().translateKey(translationKey);
 		String translated = String.format(pattern, args);
 		String clean = MessageUtils.stripColorCodes(translated);
-		TelegramClient.sendMessage(clean);
+		RelayErrorHandler.sendToTelegram(clean, "death");
 	}
 
 	public static void sendServerStartMessage() {
-		if (!TelegramClient.isInitialized()) return;
-		TelegramClient.sendMessage(PidgeConfig.getServerName() + "\nServer started!");
+		RelayErrorHandler.sendToTelegram(PidgeConfig.getServerName() + "\nServer started!", "start");
 	}
 
 	public static void sendServerStoppedMessage() {
-		if (!TelegramClient.isInitialized()) return;
-		TelegramClient.sendMessage(PidgeConfig.getServerName() + "\nServer stopped!");
+		RelayErrorHandler.sendToTelegram(PidgeConfig.getServerName() + "\nServer stopped!", "stop");
 	}
 
 	public static void sendServerSleepMessage() {
-		if (!TelegramClient.isInitialized()) return;
-		TelegramClient.sendMessage("The Night was Skipped");
+		RelayErrorHandler.sendToTelegram("The Night was Skipped", "sleep");
 	}
 }
