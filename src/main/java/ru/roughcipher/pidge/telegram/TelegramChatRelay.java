@@ -2,6 +2,7 @@ package ru.roughcipher.pidge.telegram;
 
 import ru.roughcipher.pidge.Pidge;
 import ru.roughcipher.pidge.config.PidgeConfig;
+import ru.roughcipher.pidge.config.MessageConfig;
 import ru.roughcipher.pidge.util.MessageUtils;
 import ru.roughcipher.pidge.util.RelayErrorHandler;
 import net.minecraft.server.MinecraftServer;
@@ -29,16 +30,31 @@ public class TelegramChatRelay {
 	}
 
 	public static void sendJoinLeaveMessage(String username, boolean joined) {
-		String key = joined ? "messages.player_joined" : "messages.player_left";
-		String pattern = I18n.getInstance().translateKey(key);
-		String text = String.format(pattern, username);
+		String text;
+		if (joined && MessageConfig.getPlayerJoined() != null) {
+			text = String.format(MessageConfig.getPlayerJoined(), username);
+		} else if (!joined && MessageConfig.getPlayerLeft() != null) {
+			text = String.format(MessageConfig.getPlayerLeft(), username);
+		} else {
+			String key = joined ? "messages.player_joined" : "messages.player_left";
+			String pattern = I18n.getInstance().translateKey(key);
+			text = String.format(pattern, username);
+		}
 		RelayErrorHandler.sendToTelegram(text, "joinleave");
 	}
 
 	public static void sendKickMessage(String username, String reason) {
-		String pattern = I18n.getInstance().translateKey("messages.player_kicked");
-		String text = String.format(pattern, username);
-		if (reason != null && !reason.isEmpty()) text += " (" + reason + ")";
+		String text;
+		if (MessageConfig.getPlayerKicked() != null) {
+			String reasonText = (reason != null && !reason.isEmpty()) ? reason : "";
+			text = String.format(MessageConfig.getPlayerKicked(), username, reasonText);
+		} else {
+			String pattern = I18n.getInstance().translateKey("messages.player_kicked");
+			text = String.format(pattern, username);
+			if (reason != null && !reason.isEmpty()) {
+				text += " (" + reason + ")";
+			}
+		}
 		RelayErrorHandler.sendToTelegram(text, "kick");
 	}
 
@@ -50,14 +66,14 @@ public class TelegramChatRelay {
 	}
 
 	public static void sendServerStartMessage() {
-		RelayErrorHandler.sendToTelegram(PidgeConfig.getServerName() + "\nServer started!", "start");
+		RelayErrorHandler.sendToTelegram(PidgeConfig.getServerName() + "\n" + MessageConfig.getServerStart(), "start");
 	}
 
 	public static void sendServerStoppedMessage() {
-		RelayErrorHandler.sendToTelegram(PidgeConfig.getServerName() + "\nServer stopped!", "stop");
+		RelayErrorHandler.sendToTelegram(PidgeConfig.getServerName() + "\n" + MessageConfig.getServerStop(), "stop");
 	}
 
 	public static void sendServerSleepMessage() {
-		RelayErrorHandler.sendToTelegram("The Night was Skipped", "sleep");
+		RelayErrorHandler.sendToTelegram(MessageConfig.getNightSkipped(), "sleep");
 	}
 }

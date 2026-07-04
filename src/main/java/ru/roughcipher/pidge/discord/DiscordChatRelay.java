@@ -2,6 +2,7 @@ package ru.roughcipher.pidge.discord;
 
 import ru.roughcipher.pidge.Pidge;
 import ru.roughcipher.pidge.config.PidgeConfig;
+import ru.roughcipher.pidge.config.MessageConfig;
 import ru.roughcipher.pidge.util.MessageUtils;
 import ru.roughcipher.pidge.util.RelayErrorHandler;
 import net.minecraft.server.MinecraftServer;
@@ -35,18 +36,33 @@ public class DiscordChatRelay {
 	public static void sendJoinLeaveMessage(String username, boolean joined) {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
-		String key = joined ? "messages.player_joined" : "messages.player_left";
-		String pattern = I18n.getInstance().translateKey(key);
-		String text = String.format(pattern, username);
+		String text;
+		if (joined && MessageConfig.getPlayerJoined() != null) {
+			text = String.format(MessageConfig.getPlayerJoined(), username);
+		} else if (!joined && MessageConfig.getPlayerLeft() != null) {
+			text = String.format(MessageConfig.getPlayerLeft(), username);
+		} else {
+			String key = joined ? "messages.player_joined" : "messages.player_left";
+			String pattern = I18n.getInstance().translateKey(key);
+			text = String.format(pattern, username);
+		}
 		RelayErrorHandler.sendToDiscord(channel, text, "joinleave");
 	}
 
 	public static void sendKickMessage(String username, String reason) {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
-		String pattern = I18n.getInstance().translateKey("messages.player_kicked");
-		String text = String.format(pattern, username);
-		if (reason != null && !reason.isEmpty()) text += " (" + reason + ")";
+		String text;
+		if (MessageConfig.getPlayerKicked() != null) {
+			String reasonText = (reason != null && !reason.isEmpty()) ? reason : "";
+			text = String.format(MessageConfig.getPlayerKicked(), username, reasonText);
+		} else {
+			String pattern = I18n.getInstance().translateKey("messages.player_kicked");
+			text = String.format(pattern, username);
+			if (reason != null && !reason.isEmpty()) {
+				text += " (" + reason + ")";
+			}
+		}
 		RelayErrorHandler.sendToDiscord(channel, text, "kick");
 	}
 
@@ -62,20 +78,20 @@ public class DiscordChatRelay {
 	public static void sendServerStartMessage() {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
-		String text = PidgeConfig.getServerName() + "\nServer started!";
+		String text = PidgeConfig.getServerName() + "\n" + MessageConfig.getServerStart();
 		RelayErrorHandler.sendToDiscord(channel, text, "start");
 	}
 
 	public static void sendServerStoppedMessage() {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
-		String text = PidgeConfig.getServerName() + "\nServer stopped!";
+		String text = PidgeConfig.getServerName() + "\n" + MessageConfig.getServerStop();
 		RelayErrorHandler.sendToDiscord(channel, text, "stop");
 	}
 
 	public static void sendServerSleepMessage() {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
-		RelayErrorHandler.sendToDiscord(channel, "The Night was Skipped", "sleep");
+		RelayErrorHandler.sendToDiscord(channel, MessageConfig.getNightSkipped(), "sleep");
 	}
 }
