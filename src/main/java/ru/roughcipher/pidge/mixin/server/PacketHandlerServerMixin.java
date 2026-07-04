@@ -29,10 +29,10 @@ public class PacketHandlerServerMixin {
 		String username = playerEntity.username;
 
 		if (PidgeConfig.isDiscordEnabled()) {
-			DiscordChatRelay.sendToDiscord(username, message);
+			DiscordChatRelay.sendGameMessage(username, message);
 		}
 		if (PidgeConfig.isTelegramEnabled()) {
-			TelegramChatRelay.sendToTelegram(username, message);
+			TelegramChatRelay.sendGameMessage(username, message);
 		}
 
 		return message;

@@ -43,4 +43,11 @@ public class MessageUtils {
 		if (text == null) return null;
 		return text.replaceAll("\u00a7.", "");
 	}
+
+	public static String withIcon(String icon, String message) {
+		if (icon != null && !icon.isEmpty() && message != null && !message.isEmpty()) {
+			return icon + " " + message;
+		}
+		return message;
+	}
 }

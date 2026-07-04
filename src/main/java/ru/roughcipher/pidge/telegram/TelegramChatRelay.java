@@ -25,6 +25,15 @@ public class TelegramChatRelay {
 		}
 	}
 
+	public static void sendGameMessage(String author, String message) {
+		String full = author + ": " + message;
+		String icon = MessageConfig.getGameChatIcon();
+		if (icon != null && !icon.isEmpty()) {
+			full = icon + " " + full;
+		}
+		RelayErrorHandler.sendToTelegram(full, "gamechat");
+	}
+
 	public static void sendToTelegram(String author, String message) {
 		RelayErrorHandler.sendToTelegram(author + ": " + message, "chat");
 	}
@@ -40,7 +49,8 @@ public class TelegramChatRelay {
 			String pattern = I18n.getInstance().translateKey(key);
 			text = String.format(pattern, username);
 		}
-		RelayErrorHandler.sendToTelegram(text, "joinleave");
+		String icon = joined ? MessageConfig.getJoinIcon() : MessageConfig.getLeaveIcon();
+		RelayErrorHandler.sendToTelegram(MessageUtils.withIcon(icon, text), "joinleave");
 	}
 
 	public static void sendKickMessage(String username, String reason) {
@@ -55,25 +65,28 @@ public class TelegramChatRelay {
 				text += " (" + reason + ")";
 			}
 		}
-		RelayErrorHandler.sendToTelegram(text, "kick");
+		RelayErrorHandler.sendToTelegram(MessageUtils.withIcon(MessageConfig.getKickIcon(), text), "kick");
 	}
 
 	public static void sendDeathMessage(String translationKey, Object[] args) {
 		String pattern = I18n.getInstance().translateKey(translationKey);
-		String translated = String.format(pattern, args);
-		String clean = MessageUtils.stripColorCodes(translated);
-		RelayErrorHandler.sendToTelegram(clean, "death");
+		String text = String.format(pattern, args);
+		String clean = MessageUtils.stripColorCodes(text);
+		RelayErrorHandler.sendToTelegram(MessageUtils.withIcon(MessageConfig.getDeathIcon(), clean), "death");
 	}
 
 	public static void sendServerStartMessage() {
-		RelayErrorHandler.sendToTelegram(PidgeConfig.getServerName() + "\n" + MessageConfig.getServerStart(), "start");
+		String text = PidgeConfig.getServerName() + "\n" + MessageConfig.getServerStart();
+		RelayErrorHandler.sendToTelegram(MessageUtils.withIcon(MessageConfig.getStartIcon(), text), "start");
 	}
 
 	public static void sendServerStoppedMessage() {
-		RelayErrorHandler.sendToTelegram(PidgeConfig.getServerName() + "\n" + MessageConfig.getServerStop(), "stop");
+		String text = PidgeConfig.getServerName() + "\n" + MessageConfig.getServerStop();
+		RelayErrorHandler.sendToTelegram(MessageUtils.withIcon(MessageConfig.getStopIcon(), text), "stop");
 	}
 
 	public static void sendServerSleepMessage() {
-		RelayErrorHandler.sendToTelegram(MessageConfig.getNightSkipped(), "sleep");
+		String text = MessageConfig.getNightSkipped();
+		RelayErrorHandler.sendToTelegram(MessageUtils.withIcon(MessageConfig.getNightSkippedIcon(), text), "sleep");
 	}
 }

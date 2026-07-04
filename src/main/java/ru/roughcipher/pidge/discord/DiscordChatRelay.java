@@ -26,6 +26,17 @@ public class DiscordChatRelay {
 		}
 	}
 
+	public static void sendGameMessage(String author, String message) {
+		StandardGuildMessageChannel channel = DiscordClient.getChannel();
+		if (channel == null) return;
+		String full = author + ": " + message;
+		String icon = MessageConfig.getGameChatIcon();
+		if (icon != null && !icon.isEmpty()) {
+			full = icon + " " + full;
+		}
+		RelayErrorHandler.sendToDiscord(channel, full, "gamechat");
+	}
+
 	public static void sendToDiscord(String author, String message) {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
@@ -46,7 +57,8 @@ public class DiscordChatRelay {
 			String pattern = I18n.getInstance().translateKey(key);
 			text = String.format(pattern, username);
 		}
-		RelayErrorHandler.sendToDiscord(channel, text, "joinleave");
+		String icon = joined ? MessageConfig.getJoinIcon() : MessageConfig.getLeaveIcon();
+		RelayErrorHandler.sendToDiscord(channel, MessageUtils.withIcon(icon, text), "joinleave");
 	}
 
 	public static void sendKickMessage(String username, String reason) {
@@ -63,35 +75,36 @@ public class DiscordChatRelay {
 				text += " (" + reason + ")";
 			}
 		}
-		RelayErrorHandler.sendToDiscord(channel, text, "kick");
+		RelayErrorHandler.sendToDiscord(channel, MessageUtils.withIcon(MessageConfig.getKickIcon(), text), "kick");
 	}
 
 	public static void sendDeathMessage(String translationKey, Object[] args) {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
 		String pattern = I18n.getInstance().translateKey(translationKey);
-		String translated = String.format(pattern, args);
-		String clean = MessageUtils.stripColorCodes(translated);
-		RelayErrorHandler.sendToDiscord(channel, clean, "death");
+		String text = String.format(pattern, args);
+		String clean = MessageUtils.stripColorCodes(text);
+		RelayErrorHandler.sendToDiscord(channel, MessageUtils.withIcon(MessageConfig.getDeathIcon(), clean), "death");
 	}
 
 	public static void sendServerStartMessage() {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
 		String text = PidgeConfig.getServerName() + "\n" + MessageConfig.getServerStart();
-		RelayErrorHandler.sendToDiscord(channel, text, "start");
+		RelayErrorHandler.sendToDiscord(channel, MessageUtils.withIcon(MessageConfig.getStartIcon(), text), "start");
 	}
 
 	public static void sendServerStoppedMessage() {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
 		String text = PidgeConfig.getServerName() + "\n" + MessageConfig.getServerStop();
-		RelayErrorHandler.sendToDiscord(channel, text, "stop");
+		RelayErrorHandler.sendToDiscord(channel, MessageUtils.withIcon(MessageConfig.getStopIcon(), text), "stop");
 	}
 
 	public static void sendServerSleepMessage() {
 		StandardGuildMessageChannel channel = DiscordClient.getChannel();
 		if (channel == null) return;
-		RelayErrorHandler.sendToDiscord(channel, MessageConfig.getNightSkipped(), "sleep");
+		String text = MessageConfig.getNightSkipped();
+		RelayErrorHandler.sendToDiscord(channel, MessageUtils.withIcon(MessageConfig.getNightSkippedIcon(), text), "sleep");
 	}
 }
