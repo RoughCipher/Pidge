@@ -3,12 +3,16 @@ package ru.roughcipher.pidge.discord;
 import ru.roughcipher.pidge.Pidge;
 import ru.roughcipher.pidge.config.PidgeConfig;
 import ru.roughcipher.pidge.telegram.TelegramChatRelay;
+import ru.roughcipher.pidge.util.BaseChatRelay;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 import net.dv8tion.jda.api.events.GenericEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
+import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.minecraft.core.net.ChatEmotes;
 import org.jetbrains.annotations.NotNull;
@@ -40,6 +44,25 @@ public class DiscordClient {
 			builder.addEventListeners(new Listener());
 			jda = builder.build().awaitReady();
 			Pidge.LOGGER.info("Discord client started");
+
+			StandardGuildMessageChannel ch = getChannel();
+			if (ch != null) {
+				Guild guild = ch.getGuild();
+				guild.retrieveCommands().queue(commands -> {
+					for (net.dv8tion.jda.api.interactions.commands.Command command : commands) {
+						command.delete().queue();
+					}
+					guild.updateCommands().addCommands(
+						Commands.slash("list", "Show online players")
+					).queue(
+						success -> Pidge.LOGGER.info("Registered /list command on guild {}", guild.getName()),
+						failure -> Pidge.LOGGER.error("Failed to register /list command on guild", failure)
+					);
+				});
+			} else {
+				Pidge.LOGGER.warn("Discord channel not found, cannot register commands");
+			}
+
 			return true;
 		} catch (Throwable t) {
 			Pidge.LOGGER.error("Discord init failed", t);
@@ -69,10 +92,24 @@ public class DiscordClient {
 	public static class Listener implements EventListener {
 		@Override
 		public void onEvent(@NotNull GenericEvent event) {
+			if (event instanceof SlashCommandInteractionEvent slash) {
+				if (!slash.getChannel().getId().equals(PidgeConfig.getDiscordChannel())) return;
+				if (slash.getName().equals("list")) {
+					slash.reply(BaseChatRelay.getPlayerListString()).queue();
+				}
+				return;
+			}
+
 			if (!(event instanceof MessageReceivedEvent msg)) return;
 			if (msg.getAuthor().isBot() || msg.getAuthor().isSystem()) return;
 			if (!msg.isFromGuild()) return;
 			if (!msg.getMessage().getChannel().getId().equals(PidgeConfig.getDiscordChannel())) return;
+
+			String raw = msg.getMessage().getContentRaw();
+			if (raw.equalsIgnoreCase("/list")) {
+				msg.getChannel().sendMessage(BaseChatRelay.getPlayerListString()).queue();
+				return;
+			}
 
 			String author = msg.getAuthor().getName();
 			String content = ChatEmotes.process(msg.getMessage().getContentStripped());

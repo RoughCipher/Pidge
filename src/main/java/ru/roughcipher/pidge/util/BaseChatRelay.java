@@ -6,6 +6,10 @@ import ru.roughcipher.pidge.config.PidgeConfig;
 import net.minecraft.core.net.command.TextFormatting;
 import net.minecraft.core.lang.I18n;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.entity.player.PlayerServer;
+import net.minecraft.core.net.command.util.CommandHelper;
+
+import java.util.List;
 
 public abstract class BaseChatRelay {
 
@@ -22,6 +26,30 @@ public abstract class BaseChatRelay {
 		Pidge.info(formatted);
 		for (String line : formatted.split("\n")) {
 			server.playerList.sendEncryptedChatToAllPlayers(line);
+		}
+	}
+
+	public static String getPlayerListString() {
+		MinecraftServer server = MinecraftServer.getInstance();
+		if (server == null || server.playerList == null) {
+			return I18n.getInstance().translateKey("command.commands.list.exception_failure");
+		}
+		List<PlayerServer> players = server.playerList.playerEntities;
+		int count = players.size();
+		if (count == 0) {
+			return I18n.getInstance().translateKey("command.commands.list.exception_failure");
+		}
+		StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < count; i++) {
+			if (i > 0) builder.append(", ");
+			String name = CommandHelper.getEntityName(players.get(i));
+			builder.append(name);
+		}
+		String list = MessageUtils.stripColorCodes(builder.toString());
+		if (count == 1) {
+			return String.format(I18n.getInstance().translateKey("command.commands.list.success_single"), count, list);
+		} else {
+			return String.format(I18n.getInstance().translateKey("command.commands.list.success_multiple"), count, list);
 		}
 	}
 
