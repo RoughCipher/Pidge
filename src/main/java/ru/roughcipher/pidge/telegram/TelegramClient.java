@@ -28,8 +28,8 @@ public class TelegramClient {
 								: message.from().firstName() + (message.from().lastName() != null ? " " + message.from().lastName() : "");
 							String text = message.text();
 							if (text != null && !text.isEmpty()) {
-								TelegramChatRelay.sendToMinecraft(author, text);
-								DiscordChatRelay.sendToDiscord("[T] " + author, text);
+								TelegramChatRelay.INSTANCE.sendToMinecraft(author, text);
+								DiscordChatRelay.INSTANCE.sendToDiscord("[T] " + author, text);
 							}
 						}
 					}

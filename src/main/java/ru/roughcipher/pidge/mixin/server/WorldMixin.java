@@ -15,7 +15,7 @@ public class WorldMixin {
 		at = @At("RETURN")
 	)
 	public void sendServerSleepMessage(CallbackInfo ci) {
-		DiscordChatRelay.sendServerSleepMessage();
-		TelegramChatRelay.sendServerSleepMessage();
+		DiscordChatRelay.INSTANCE.sendServerSleepMessage();
+		TelegramChatRelay.INSTANCE.sendServerSleepMessage();
 	}
 }

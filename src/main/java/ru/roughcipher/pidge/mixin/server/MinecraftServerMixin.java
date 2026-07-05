@@ -9,9 +9,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = MinecraftServer.class, remap = false)
 public class MinecraftServerMixin {
-    @Inject(method = "initiateShutdown", at = @At("HEAD"))
-    public void onShutdown(CallbackInfo ci) {
-        Pidge.markShutdownSent();
-        Pidge.sendShutdownMessages();
-    }
+	@Inject(method = "initiateShutdown", at = @At("HEAD"))
+	public void onShutdown(CallbackInfo ci) {
+		Pidge.markShutdownSent();
+		Pidge.sendShutdownMessages();
+	}
 }

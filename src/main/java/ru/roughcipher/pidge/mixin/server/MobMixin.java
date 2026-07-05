@@ -24,8 +24,8 @@ public abstract class MobMixin {
 	private void redirectDeathMessage(World world, TextFormatting.Base color, String translationKey, String[] args) {
 		world.sendGlobalMessage(color + String.format(I18n.getInstance().translateKey(translationKey), (Object[]) args));
 		if ((Object) this instanceof Player) {
-			DiscordChatRelay.sendDeathMessage(translationKey, args);
-			TelegramChatRelay.sendDeathMessage(translationKey, args);
+			DiscordChatRelay.INSTANCE.sendDeathMessage(translationKey, args);
+			TelegramChatRelay.INSTANCE.sendDeathMessage(translationKey, args);
 		}
 	}
 }

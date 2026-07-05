@@ -32,13 +32,13 @@ public class Pidge implements ModInitializer {
 
 		new Thread(() -> {
 			if (DiscordClient.init()) {
-				DiscordChatRelay.sendServerStartMessage();
+				DiscordChatRelay.INSTANCE.sendServerStartMessage();
 			}
 		}).start();
 
 		new Thread(() -> {
 			if (TelegramClient.init()) {
-				TelegramChatRelay.sendServerStartMessage();
+				TelegramChatRelay.INSTANCE.sendServerStartMessage();
 			}
 		}).start();
 
@@ -47,8 +47,8 @@ public class Pidge implements ModInitializer {
 
 	public static void sendShutdownMessages() {
 		try { Thread.sleep(500); } catch (InterruptedException ignored) {}
-		DiscordChatRelay.sendServerStoppedMessage();
-		TelegramChatRelay.sendServerStoppedMessage();
+		DiscordChatRelay.INSTANCE.sendServerStoppedMessage();
+		TelegramChatRelay.INSTANCE.sendServerStoppedMessage();
 		DiscordClient.shutdown();
 		TelegramClient.shutdown();
 	}

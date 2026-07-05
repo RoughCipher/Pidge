@@ -69,16 +69,15 @@ public class DiscordClient {
 	public static class Listener implements EventListener {
 		@Override
 		public void onEvent(@NotNull GenericEvent event) {
-			if (!(event instanceof MessageReceivedEvent)) return;
-			MessageReceivedEvent msg = (MessageReceivedEvent) event;
+			if (!(event instanceof MessageReceivedEvent msg)) return;
 			if (msg.getAuthor().isBot() || msg.getAuthor().isSystem()) return;
 			if (!msg.isFromGuild()) return;
 			if (!msg.getMessage().getChannel().getId().equals(PidgeConfig.getDiscordChannel())) return;
 
 			String author = msg.getAuthor().getName();
 			String content = ChatEmotes.process(msg.getMessage().getContentStripped());
-			DiscordChatRelay.sendToMinecraft(author, content);
-			TelegramChatRelay.sendToTelegram("[D] " + author, content);
+			DiscordChatRelay.INSTANCE.sendToMinecraft(author, content);
+			TelegramChatRelay.INSTANCE.sendToTelegram("[D] " + author, content);
 		}
 	}
 }

@@ -29,10 +29,10 @@ public class PacketHandlerServerMixin {
 		String username = playerEntity.username;
 
 		if (PidgeConfig.isDiscordEnabled()) {
-			DiscordChatRelay.sendGameMessage(username, message);
+			DiscordChatRelay.INSTANCE.sendGameMessage(username, message);
 		}
 		if (PidgeConfig.isTelegramEnabled()) {
-			TelegramChatRelay.sendGameMessage(username, message);
+			TelegramChatRelay.INSTANCE.sendGameMessage(username, message);
 		}
 
 		return message;
@@ -44,8 +44,8 @@ public class PacketHandlerServerMixin {
 	)
 	void sendLeaveMessage(String s, Object[] aobj, CallbackInfo ci) {
 		String username = playerEntity.username;
-		DiscordChatRelay.sendJoinLeaveMessage(username, false);
-		TelegramChatRelay.sendJoinLeaveMessage(username, false);
+		DiscordChatRelay.INSTANCE.sendJoinLeaveMessage(username, false);
+		TelegramChatRelay.INSTANCE.sendJoinLeaveMessage(username, false);
 	}
 
 	@Inject(
@@ -54,7 +54,7 @@ public class PacketHandlerServerMixin {
 	)
 	void onKickPlayer(String reason, CallbackInfo ci) {
 		String username = playerEntity.username;
-		DiscordChatRelay.sendKickMessage(username, reason);
-		TelegramChatRelay.sendKickMessage(username, reason);
+		DiscordChatRelay.INSTANCE.sendKickMessage(username, reason);
+		TelegramChatRelay.INSTANCE.sendKickMessage(username, reason);
 	}
 }
