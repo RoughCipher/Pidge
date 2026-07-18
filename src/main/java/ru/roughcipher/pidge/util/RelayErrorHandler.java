@@ -26,6 +26,17 @@ public class RelayErrorHandler {
 		}
 	}
 
+	public static void sendToDiscordSync(StandardGuildMessageChannel channel, String message, String context) {
+		if (channel == null) return;
+		for (String fragment : MessageUtils.splitMessage(message, DISCORD_LIMIT)) {
+			try {
+				channel.sendMessage(fragment).complete();
+			} catch (Exception e) {
+				logError("Discord", context, e.getMessage());
+			}
+		}
+	}
+
 	public static void sendToTelegram(String message, String context) {
 		for (String fragment : MessageUtils.splitMessage(message, TELEGRAM_LIMIT)) {
 			try {

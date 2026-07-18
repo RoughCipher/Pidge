@@ -97,7 +97,6 @@ public class MessageConfig {
 		save();
 	}
 
-	// Геттеры остаются без изменений
 	public static String getPlayerJoined() { return playerJoined; }
 	public static String getPlayerLeft() { return playerLeft; }
 	public static String getPlayerKicked() { return playerKicked; }

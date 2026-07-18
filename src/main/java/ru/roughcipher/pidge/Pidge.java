@@ -9,6 +9,8 @@ import ru.roughcipher.pidge.discord.DiscordChatRelay;
 import ru.roughcipher.pidge.discord.DiscordClient;
 import ru.roughcipher.pidge.telegram.TelegramChatRelay;
 import ru.roughcipher.pidge.telegram.TelegramClient;
+import ru.roughcipher.pidge.util.MessageUtils;
+import ru.roughcipher.pidge.util.RelayErrorHandler;
 
 public class Pidge implements ModInitializer {
 	public static final String MOD_ID = "pidge";
@@ -46,9 +48,24 @@ public class Pidge implements ModInitializer {
 	}
 
 	public static void sendShutdownMessages() {
-		try { Thread.sleep(500); } catch (InterruptedException ignored) {}
-		DiscordChatRelay.INSTANCE.sendServerStoppedMessage();
-		TelegramChatRelay.INSTANCE.sendServerStoppedMessage();
+		String stopText = PidgeConfig.getServerName() + "\n" + MessageConfig.getServerStop();
+		String finalMessage = MessageUtils.withIcon(MessageConfig.getStopIcon(), stopText);
+
+		var discordChannel = DiscordClient.getChannel();
+		if (discordChannel != null) {
+			RelayErrorHandler.sendToDiscordSync(discordChannel, finalMessage, "stop");
+			LOGGER.info("Server stopped message sent to Discord");
+		}
+
+		if (TelegramClient.isInitialized()) {
+			TelegramClient.sendMessage(finalMessage);
+			LOGGER.info("Server stopped message sent to Telegram");
+		}
+
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException ignored) {}
+
 		DiscordClient.shutdown();
 		TelegramClient.shutdown();
 	}
