@@ -89,11 +89,10 @@ public class PidgeConfig {
 	}
 
 	private static void updateValues(JsonObject object) {
+		serverName = get(object, "server_name", serverName);
 		discordEnable = get(object, "discord_enable", discordEnable);
 		discordToken = get(object, "discord_token", discordToken);
 		discordChannel = get(object, "discord_channel", discordChannel);
-		serverName = get(object, "server_name", serverName);
-
 		telegramEnable = get(object, "telegram_enable", telegramEnable);
 		telegramToken = get(object, "telegram_token", telegramToken);
 		telegramChatId = get(object, "telegram_chat_id", telegramChatId);

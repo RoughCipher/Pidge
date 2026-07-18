@@ -56,9 +56,6 @@ dependencies {
 
 	runtimeOnly(libs.clientJar)
 	implementation(libs.loader)
-	// If you do not need Halplibe you can comment out or delete this line.
-	implementation(libs.halplibe)
-	implementation(libs.modMenu)
 	implementation(libs.legacyLwjgl)
 
 	implementation(libs.slf4jApi)
@@ -145,9 +142,7 @@ tasks {
 		val resourceMap = mapOf(
 			"version" to project.version.toString(),
 			"fabricloader" to libs.versions.loader.get(),
-			"halplibe" to libs.versions.halplibe.get(),
-			"java" to libs.versions.java.get(),
-			"modmenu" to libs.versions.modMenu.get()
+			"java" to libs.versions.java.get()
 		)
 		inputs.properties(resourceMap)
 		filesMatching("fabric.mod.json") { expand(resourceMap) }

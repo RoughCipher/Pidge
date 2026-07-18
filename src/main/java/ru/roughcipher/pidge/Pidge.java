@@ -9,12 +9,12 @@ import ru.roughcipher.pidge.discord.DiscordChatRelay;
 import ru.roughcipher.pidge.discord.DiscordClient;
 import ru.roughcipher.pidge.telegram.TelegramChatRelay;
 import ru.roughcipher.pidge.telegram.TelegramClient;
-import turniplabs.halplibe.HalpLibe;
 
 public class Pidge implements ModInitializer {
-	public static final String MOD_ID = HalpLibe.registerMod("pidge", true);
+	public static final String MOD_ID = "pidge";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	private static volatile boolean shutdownSent = false;
+	private static String btaVersion = null;
 
 	@Override
 	public void onInitialize() {
@@ -59,5 +59,16 @@ public class Pidge implements ModInitializer {
 
 	public static void info(String s) {
 		LOGGER.info(s);
+	}
+
+	public static String getBTAVersion() {
+		if (btaVersion != null) return btaVersion;
+		try {
+			java.lang.reflect.Field field = net.minecraft.core.Version.class.getField("VERSION");
+			btaVersion = (String) field.get(null);
+		} catch (Exception e) {
+			btaVersion = "unknown";
+		}
+		return btaVersion;
 	}
 }

@@ -2,7 +2,7 @@
 ##########################################################################
 # Plugins
 # Check this on https://github.com/FabricMC/fabric-loom/releases/latest/
-loom = "1.15-SNAPSHOT"
+loom = "1.17-SNAPSHOT"
 # Check this on https://plugins.gradle.org/plugin/com.smushytaco.lwjgl3/
 lwjglPlugin = "1.0.2"
 ##########################################################################
@@ -14,27 +14,23 @@ gradleJava = "21"
 ##########################################################################
 # Mod Dependencies
 # Check this on https://downloads.betterthanadventure.net/bta-client/
-bta = "v8.0-pre2"
+bta = "v8.0-pre3"
 # Options are release, prerelease, nightly, and misc.
 btaChannel = "prerelease"
 # Check this on https://maven.thesignalumproject.net/#/infrastructure/net/fabricmc/fabric-loader/
 loader = "0.18.4-bta.11"
-# Check this on https://github.com/Turnip-Labs/ModMenu/releases/latest/
-modMenu = "5.0.0"
-# Check this on https://github.com/Turnip-Labs/bta-halplibe/releases/latest/
-halplibe = "6.0.2"
 # Check this on https://github.com/Better-than-Adventure/legacy-lwjgl3/releases/latest/
 legacyLwjgl = "1.0.6"
 ##########################################################################
 # Dependencies
 # Check this on https://central.sonatype.com/artifact/org.slf4j/slf4j-api/
-slf4jApi = "2.0.17"
+slf4jApi = "2.0.18"
 # Check this on https://central.sonatype.com/artifact/com.google.guava/guava/
-guava = "33.5.0-jre"
+guava = "33.6.0-jre"
 # Check this on https://central.sonatype.com/artifact/org.apache.logging.log4j/log4j-api/
-log4j = "2.20.0"
+log4j = "2.25.5"
 # Check this on https://central.sonatype.com/artifact/com.google.code.gson/gson/
-gson = "2.13.2"
+gson = "2.14.0"
 # Check this on https://central.sonatype.com/artifact/org.apache.commons/commons-lang3/
 commonsLang3 = "3.20.0"
 # This should match the version used by the current BTA release.
@@ -55,8 +51,6 @@ telegramBotApi = "10.1.0"
 
 [libraries]
 loader = { group = "net.fabricmc", name = "fabric-loader", version.ref = "loader" }
-halplibe = { group = "turniplabs", name = "halplibe", version.ref = "halplibe" }
-modMenu = { group = "turniplabs", name = "modmenu-bta", version.ref = "modMenu" }
 legacyLwjgl = { group = "legacy-lwjgl3", name = "legacy-lwjgl3", version.ref = "legacyLwjgl" }
 slf4jApi = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4jApi" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }

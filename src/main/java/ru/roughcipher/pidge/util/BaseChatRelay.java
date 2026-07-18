@@ -100,7 +100,8 @@ public abstract class BaseChatRelay {
 	}
 
 	public void sendServerStartMessage() {
-		String text = PidgeConfig.getServerName() + "\n" + MessageConfig.getServerStart();
+		String version = Pidge.getBTAVersion();
+		String text = PidgeConfig.getServerName() + " (v" + version + ")\n" + MessageConfig.getServerStart();
 		sendRaw(MessageUtils.withIcon(MessageConfig.getStartIcon(), text), "start");
 	}
 

@@ -1,18 +1,19 @@
 package ru.roughcipher.pidge.config;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import ru.roughcipher.pidge.Pidge;
-import turniplabs.halplibe.util.toml.Toml;
-import turniplabs.halplibe.util.toml.TomlParser;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class MessageConfig {
-	private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("pidge/messages.toml");
+	private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("pidge/messages.json");
 
 	private static String playerJoined = null;
 	private static String playerLeft = null;
@@ -30,6 +31,8 @@ public class MessageConfig {
 	private static String deathIcon = "☠";
 	private static String gameChatIcon = "✉";
 
+	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+
 	static {
 		load();
 	}
@@ -39,76 +42,51 @@ public class MessageConfig {
 		if (!file.exists()) {
 			createDefaultConfig();
 		}
-		try {
-			String content = new String(Files.readAllBytes(CONFIG_PATH));
-			Toml toml = TomlParser.parse(content);
-			serverStart = getString(toml, "server_start", serverStart);
-			serverStop = getString(toml, "server_stop", serverStop);
-			nightSkipped = getString(toml, "night_skipped", nightSkipped);
-			playerJoined = getStringOrNull(toml, "player_joined");
-			playerLeft = getStringOrNull(toml, "player_left");
-			playerKicked = getStringOrNull(toml, "player_kicked");
-
-			startIcon = getString(toml, "start_icon", startIcon);
-			stopIcon = getString(toml, "stop_icon", stopIcon);
-			nightSkippedIcon = getString(toml, "night_skipped_icon", nightSkippedIcon);
-			joinIcon = getString(toml, "join_icon", joinIcon);
-			leaveIcon = getString(toml, "leave_icon", leaveIcon);
-			kickIcon = getString(toml, "kick_icon", kickIcon);
-			deathIcon = getString(toml, "death_icon", deathIcon);
-			gameChatIcon = getString(toml, "game_chat_icon", gameChatIcon);
-		} catch (Exception e) {
+		try (FileReader reader = new FileReader(file)) {
+			MessageData data = GSON.fromJson(reader, MessageData.class);
+			if (data != null) {
+				if (data.server_start != null) serverStart = data.server_start;
+				if (data.server_stop != null) serverStop = data.server_stop;
+				if (data.night_skipped != null) nightSkipped = data.night_skipped;
+				if (data.player_joined != null) playerJoined = data.player_joined.isEmpty() ? null : data.player_joined;
+				if (data.player_left != null) playerLeft = data.player_left.isEmpty() ? null : data.player_left;
+				if (data.player_kicked != null) playerKicked = data.player_kicked.isEmpty() ? null : data.player_kicked;
+				if (data.start_icon != null) startIcon = data.start_icon;
+				if (data.stop_icon != null) stopIcon = data.stop_icon;
+				if (data.night_skipped_icon != null) nightSkippedIcon = data.night_skipped_icon;
+				if (data.join_icon != null) joinIcon = data.join_icon;
+				if (data.leave_icon != null) leaveIcon = data.leave_icon;
+				if (data.kick_icon != null) kickIcon = data.kick_icon;
+				if (data.death_icon != null) deathIcon = data.death_icon;
+				if (data.game_chat_icon != null) gameChatIcon = data.game_chat_icon;
+			}
+		} catch (IOException e) {
 			Pidge.LOGGER.error("Failed to load message config, using defaults", e);
 		}
 		save();
 	}
 
 	public static void save() {
-		Toml toml = new Toml("""
-                 Pidge Message Configuration
-                 Leave player_* entries empty to use the default game messages from LanguagePack.
-                 Use %s as placeholder for player name in player_joined, player_left, player_kicked.
-                 For player_kicked you can use two %s: first for player name, second for kick reason.
-                 Example:
-                   server_start = "Server is online!"
-                   server_stop = "Server is offline!"
-                   night_skipped = "Everyone slept!"
-                   player_joined = "Welcome, %s!"
-                   player_left = "Goodbye, %s!"
-                   player_kicked = "%s was kicked because: %s"
-                 Name only:
-                   player_kicked = "%s was kicked"
-
-                 Icons are added before the message (e.g., "🛏 The Night was Skipped").
-                 Icons (leave empty to disable):
-                   start_icon = "▶"
-                   stop_icon = "⏸"
-                   night_skipped_icon = "🛏"
-                   join_icon = "›"
-                   leave_icon = "‹"
-                   kick_icon = "⚒"
-                   death_icon = "☠"
-                   game_chat_icon = "✉"
-                """);
-		toml.addEntry("server_start", serverStart);
-		toml.addEntry("server_stop", serverStop);
-		toml.addEntry("night_skipped", nightSkipped);
-		toml.addEntry("player_joined", playerJoined == null ? "" : playerJoined);
-		toml.addEntry("player_left", playerLeft == null ? "" : playerLeft);
-		toml.addEntry("player_kicked", playerKicked == null ? "" : playerKicked);
-		toml.addEntry("start_icon", startIcon);
-		toml.addEntry("stop_icon", stopIcon);
-		toml.addEntry("night_skipped_icon", nightSkippedIcon);
-		toml.addEntry("join_icon", joinIcon);
-		toml.addEntry("leave_icon", leaveIcon);
-		toml.addEntry("kick_icon", kickIcon);
-		toml.addEntry("death_icon", deathIcon);
-		toml.addEntry("game_chat_icon", gameChatIcon);
+		MessageData data = new MessageData();
+		data.server_start = serverStart;
+		data.server_stop = serverStop;
+		data.night_skipped = nightSkipped;
+		data.player_joined = playerJoined == null ? "" : playerJoined;
+		data.player_left = playerLeft == null ? "" : playerLeft;
+		data.player_kicked = playerKicked == null ? "" : playerKicked;
+		data.start_icon = startIcon;
+		data.stop_icon = stopIcon;
+		data.night_skipped_icon = nightSkippedIcon;
+		data.join_icon = joinIcon;
+		data.leave_icon = leaveIcon;
+		data.kick_icon = kickIcon;
+		data.death_icon = deathIcon;
+		data.game_chat_icon = gameChatIcon;
 
 		try {
 			Files.createDirectories(CONFIG_PATH.getParent());
 			try (FileWriter writer = new FileWriter(CONFIG_PATH.toFile())) {
-				writer.write(toml.toString());
+				writer.write(GSON.toJson(data));
 			}
 		} catch (IOException e) {
 			Pidge.LOGGER.error("Failed to save message config", e);
@@ -119,16 +97,7 @@ public class MessageConfig {
 		save();
 	}
 
-	private static String getString(Toml toml, String key, String defaultValue) {
-		String val = toml.get(key, String.class);
-		return val != null ? val : defaultValue;
-	}
-
-	private static String getStringOrNull(Toml toml, String key) {
-		String val = toml.get(key, String.class);
-		return (val == null || val.isEmpty()) ? null : val;
-	}
-
+	// Геттеры остаются без изменений
 	public static String getPlayerJoined() { return playerJoined; }
 	public static String getPlayerLeft() { return playerLeft; }
 	public static String getPlayerKicked() { return playerKicked; }
@@ -160,5 +129,22 @@ public class MessageConfig {
 		Pidge.info("kick_icon = \"" + kickIcon + "\"");
 		Pidge.info("death_icon = \"" + deathIcon + "\"");
 		Pidge.info("game_chat_icon = \"" + gameChatIcon + "\"");
+	}
+
+	private static class MessageData {
+		String player_joined;
+		String player_left;
+		String player_kicked;
+		String server_start;
+		String server_stop;
+		String night_skipped;
+		String start_icon;
+		String stop_icon;
+		String night_skipped_icon;
+		String join_icon;
+		String leave_icon;
+		String kick_icon;
+		String death_icon;
+		String game_chat_icon;
 	}
 }
