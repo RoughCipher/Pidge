@@ -121,7 +121,7 @@ jobs:
         with:
           tag: "8.0"
           commit: "8.0"
-          name: "Pidge BTA 8.0-Pre"
+          name: "Pidge BTA 8.0"
           body: |
             **Дата и время сборки:** ${{ needs.build.outputs.datetime }} (МСК)
             **Последний коммит:** [`${{ needs.build.outputs.sha }}`](https://github.com/${{ github.repository }}/commit/${{ github.sha }})
