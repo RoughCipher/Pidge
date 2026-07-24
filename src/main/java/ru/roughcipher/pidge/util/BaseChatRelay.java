@@ -106,6 +106,16 @@ public abstract class BaseChatRelay {
 		sendRaw(MessageUtils.withIcon(icon, clean), "death");
 	}
 
+	public void sendSayMessage(String senderName, String message) {
+		String clean = MessageUtils.stripColorCodes("[" + senderName + "] " + message);
+		sendRaw(clean, "say");
+	}
+
+	public void sendMeMessage(String playerName, String message) {
+		String clean = MessageUtils.stripColorCodes("* " + playerName + " " + message);
+		sendRaw(clean, "me");
+	}
+
 	public void sendServerStartMessage() {
 		String version = Pidge.getBTAVersion();
 		String text = PidgeConfig.getServerName() + " (" + version + ")\n" + MessageConfig.getServerStart();

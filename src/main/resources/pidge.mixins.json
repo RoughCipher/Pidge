@@ -10,8 +10,9 @@
   "server": [
     "server.MinecraftServerMixin",
     "server.MobMixin",
-    "server.PlayerListMixin",
     "server.PacketHandlerServerMixin",
+    "server.PlayerListMixin",
+    "server.PlayerListSayMeMixin",
     "server.WorldMixin"
   ]
 }
