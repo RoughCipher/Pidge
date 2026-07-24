@@ -98,16 +98,17 @@ public abstract class BaseChatRelay {
 		sendRaw(MessageUtils.withIcon(MessageConfig.getKickIcon(), text), "kick");
 	}
 
-	public void sendDeathMessage(String translationKey, Object[] args) {
+	public void sendDeathMessage(String translationKey, Object[] args, boolean isPlayer) {
 		String pattern = I18n.getInstance().translateKey(translationKey);
 		String text = String.format(pattern, args);
 		String clean = MessageUtils.stripColorCodes(text);
-		sendRaw(MessageUtils.withIcon(MessageConfig.getDeathIcon(), clean), "death");
+		String icon = isPlayer ? MessageConfig.getDeathIcon() : MessageConfig.getMobDeathIcon();
+		sendRaw(MessageUtils.withIcon(icon, clean), "death");
 	}
 
 	public void sendServerStartMessage() {
 		String version = Pidge.getBTAVersion();
-		String text = PidgeConfig.getServerName() + " (v" + version + ")\n" + MessageConfig.getServerStart();
+		String text = PidgeConfig.getServerName() + " (" + version + ")\n" + MessageConfig.getServerStart();
 		sendRaw(MessageUtils.withIcon(MessageConfig.getStartIcon(), text), "start");
 	}
 

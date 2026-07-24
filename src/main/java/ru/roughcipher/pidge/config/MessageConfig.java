@@ -29,6 +29,7 @@ public class MessageConfig {
 	private static String leaveIcon = "‹";
 	private static String kickIcon = "⚒";
 	private static String deathIcon = "☠";
+	private static String mobDeathIcon = "☠";
 	private static String gameChatIcon = "✉";
 
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -58,6 +59,7 @@ public class MessageConfig {
 				if (data.leave_icon != null) leaveIcon = data.leave_icon;
 				if (data.kick_icon != null) kickIcon = data.kick_icon;
 				if (data.death_icon != null) deathIcon = data.death_icon;
+				if (data.mob_death_icon != null) mobDeathIcon = data.mob_death_icon;
 				if (data.game_chat_icon != null) gameChatIcon = data.game_chat_icon;
 			}
 		} catch (IOException e) {
@@ -81,6 +83,7 @@ public class MessageConfig {
 		data.leave_icon = leaveIcon;
 		data.kick_icon = kickIcon;
 		data.death_icon = deathIcon;
+		data.mob_death_icon = mobDeathIcon;
 		data.game_chat_icon = gameChatIcon;
 
 		try {
@@ -111,6 +114,7 @@ public class MessageConfig {
 	public static String getLeaveIcon() { return leaveIcon; }
 	public static String getKickIcon() { return kickIcon; }
 	public static String getDeathIcon() { return deathIcon; }
+	public static String getMobDeathIcon() { return mobDeathIcon; }
 	public static String getGameChatIcon() { return gameChatIcon; }
 
 	public static void printConfigValues() {
@@ -127,6 +131,7 @@ public class MessageConfig {
 		Pidge.info("leave_icon = \"" + leaveIcon + "\"");
 		Pidge.info("kick_icon = \"" + kickIcon + "\"");
 		Pidge.info("death_icon = \"" + deathIcon + "\"");
+		Pidge.info("mob_death_icon = \"" + mobDeathIcon + "\"");
 		Pidge.info("game_chat_icon = \"" + gameChatIcon + "\"");
 	}
 
@@ -144,6 +149,7 @@ public class MessageConfig {
 		String leave_icon;
 		String kick_icon;
 		String death_icon;
+		String mob_death_icon;
 		String game_chat_icon;
 	}
 }
