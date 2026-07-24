@@ -43,7 +43,7 @@ public class PacketHandlerServerMixin {
 		method = "handleErrorMessage",
 		at = @At("HEAD")
 	)
-	void sendLeaveMessage(String s, Object[] aobj, CallbackInfo ci) {
+	void sendLeaveMessage(String message, Object[] objects, CallbackInfo ci) {
 		String displayName = PlayerUtils.getDisplayName(playerEntity);
 		DiscordChatRelay.INSTANCE.sendJoinLeaveMessage(displayName, false);
 		TelegramChatRelay.INSTANCE.sendJoinLeaveMessage(displayName, false);
@@ -53,9 +53,9 @@ public class PacketHandlerServerMixin {
 		method = "kickPlayer",
 		at = @At("HEAD")
 	)
-	void onKickPlayer(String reason, CallbackInfo ci) {
+	void onKickPlayer(String s, CallbackInfo ci) {
 		String displayName = PlayerUtils.getDisplayName(playerEntity);
-		DiscordChatRelay.INSTANCE.sendKickMessage(displayName, reason);
-		TelegramChatRelay.INSTANCE.sendKickMessage(displayName, reason);
+		DiscordChatRelay.INSTANCE.sendKickMessage(displayName, s);
+		TelegramChatRelay.INSTANCE.sendKickMessage(displayName, s);
 	}
 }

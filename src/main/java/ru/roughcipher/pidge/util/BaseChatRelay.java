@@ -44,7 +44,7 @@ public abstract class BaseChatRelay {
 			PlayerServer player = players.get(i);
 			String username = player.username;
 			String nickname = player.nickname;
-			if (nickname != null && !nickname.isEmpty()) {
+			if (!nickname.isEmpty()) {
 				String cleanNick = MessageUtils.stripColorCodes(nickname);
 				builder.append(cleanNick).append(" (").append(username).append(")");
 			} else {
@@ -109,11 +109,6 @@ public abstract class BaseChatRelay {
 		String version = Pidge.getBTAVersion();
 		String text = PidgeConfig.getServerName() + " (v" + version + ")\n" + MessageConfig.getServerStart();
 		sendRaw(MessageUtils.withIcon(MessageConfig.getStartIcon(), text), "start");
-	}
-
-	public void sendServerStoppedMessage() {
-		String text = PidgeConfig.getServerName() + "\n" + MessageConfig.getServerStop();
-		sendRaw(MessageUtils.withIcon(MessageConfig.getStopIcon(), text), "stop");
 	}
 
 	public void sendServerSleepMessage() {
