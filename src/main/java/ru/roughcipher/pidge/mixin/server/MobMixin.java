@@ -56,7 +56,7 @@ public abstract class MobMixin {
 		Mob self = (Mob) (Object) this;
 		if (!(self instanceof Player)) return;
 
-		if (!self.sendsDeathMessage(entityKilledBy)) {
+		if (self.sendsDeathMessage(entityKilledBy)) {
 			String key = self.getDeathMessageKey(entityKilledBy);
 			Object[] args;
 			if (entityKilledBy != null) {

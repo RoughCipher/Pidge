@@ -7,7 +7,6 @@ import net.minecraft.core.net.command.TextFormatting;
 import net.minecraft.core.lang.I18n;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.entity.player.PlayerServer;
-import net.minecraft.core.net.command.util.CommandHelper;
 
 import java.util.List;
 
@@ -42,8 +41,15 @@ public abstract class BaseChatRelay {
 		StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < count; i++) {
 			if (i > 0) builder.append(", ");
-			String name = CommandHelper.getEntityName(players.get(i));
-			builder.append(name);
+			PlayerServer player = players.get(i);
+			String username = player.username;
+			String nickname = player.nickname;
+			if (nickname != null && !nickname.isEmpty()) {
+				String cleanNick = MessageUtils.stripColorCodes(nickname);
+				builder.append(cleanNick).append(" (").append(username).append(")");
+			} else {
+				builder.append(username);
+			}
 		}
 		String list = MessageUtils.stripColorCodes(builder.toString());
 		if (count == 1) {

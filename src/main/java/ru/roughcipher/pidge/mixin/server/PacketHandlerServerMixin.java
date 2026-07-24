@@ -3,6 +3,7 @@ package ru.roughcipher.pidge.mixin.server;
 import ru.roughcipher.pidge.discord.DiscordChatRelay;
 import ru.roughcipher.pidge.telegram.TelegramChatRelay;
 import ru.roughcipher.pidge.config.PidgeConfig;
+import ru.roughcipher.pidge.util.PlayerUtils;
 import net.minecraft.core.net.ChatEmotes;
 import net.minecraft.server.entity.player.PlayerServer;
 import net.minecraft.server.net.handler.PacketHandlerServer;
@@ -26,13 +27,13 @@ public class PacketHandlerServerMixin {
 	)
 	String redirectChatHandle(String s) {
 		String message = ChatEmotes.process(s);
-		String username = playerEntity.username;
+		String displayName = PlayerUtils.getDisplayName(playerEntity);
 
 		if (PidgeConfig.isDiscordEnabled()) {
-			DiscordChatRelay.INSTANCE.sendGameMessage(username, message);
+			DiscordChatRelay.INSTANCE.sendGameMessage(displayName, message);
 		}
 		if (PidgeConfig.isTelegramEnabled()) {
-			TelegramChatRelay.INSTANCE.sendGameMessage(username, message);
+			TelegramChatRelay.INSTANCE.sendGameMessage(displayName, message);
 		}
 
 		return message;
@@ -43,9 +44,9 @@ public class PacketHandlerServerMixin {
 		at = @At("HEAD")
 	)
 	void sendLeaveMessage(String s, Object[] aobj, CallbackInfo ci) {
-		String username = playerEntity.username;
-		DiscordChatRelay.INSTANCE.sendJoinLeaveMessage(username, false);
-		TelegramChatRelay.INSTANCE.sendJoinLeaveMessage(username, false);
+		String displayName = PlayerUtils.getDisplayName(playerEntity);
+		DiscordChatRelay.INSTANCE.sendJoinLeaveMessage(displayName, false);
+		TelegramChatRelay.INSTANCE.sendJoinLeaveMessage(displayName, false);
 	}
 
 	@Inject(
@@ -53,8 +54,8 @@ public class PacketHandlerServerMixin {
 		at = @At("HEAD")
 	)
 	void onKickPlayer(String reason, CallbackInfo ci) {
-		String username = playerEntity.username;
-		DiscordChatRelay.INSTANCE.sendKickMessage(username, reason);
-		TelegramChatRelay.INSTANCE.sendKickMessage(username, reason);
+		String displayName = PlayerUtils.getDisplayName(playerEntity);
+		DiscordChatRelay.INSTANCE.sendKickMessage(displayName, reason);
+		TelegramChatRelay.INSTANCE.sendKickMessage(displayName, reason);
 	}
 }

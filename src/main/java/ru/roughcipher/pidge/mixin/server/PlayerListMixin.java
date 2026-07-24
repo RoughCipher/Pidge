@@ -2,6 +2,7 @@ package ru.roughcipher.pidge.mixin.server;
 
 import ru.roughcipher.pidge.discord.DiscordChatRelay;
 import ru.roughcipher.pidge.telegram.TelegramChatRelay;
+import ru.roughcipher.pidge.util.PlayerUtils;
 import net.minecraft.server.entity.player.PlayerServer;
 import net.minecraft.server.net.PlayerList;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,8 +17,8 @@ public class PlayerListMixin {
 		at = @At("HEAD")
 	)
 	public void onPlayerLoggedIn(PlayerServer player, CallbackInfo ci) {
-		String username = player.username;
-		DiscordChatRelay.INSTANCE.sendJoinLeaveMessage(username, true);
-		TelegramChatRelay.INSTANCE.sendJoinLeaveMessage(username, true);
+		String displayName = PlayerUtils.getDisplayName(player);
+		DiscordChatRelay.INSTANCE.sendJoinLeaveMessage(displayName, true);
+		TelegramChatRelay.INSTANCE.sendJoinLeaveMessage(displayName, true);
 	}
 }
