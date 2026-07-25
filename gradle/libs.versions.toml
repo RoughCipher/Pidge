@@ -14,7 +14,7 @@ gradleJava = "21"
 ##########################################################################
 # Mod Dependencies
 # Check this on https://downloads.betterthanadventure.net/bta-client/
-bta = "v8.0"
+bta = "v8.0.1"
 # Options are release, prerelease, nightly, and misc.
 btaChannel = "release"
 # Check this on https://maven.thesignalumproject.net/#/infrastructure/net/fabricmc/fabric-loader/
@@ -27,8 +27,6 @@ legacyLwjgl = "1.0.6"
 slf4jApi = "2.0.18"
 # Check this on https://central.sonatype.com/artifact/com.google.guava/guava/
 guava = "33.6.0-jre"
-# Check this on https://central.sonatype.com/artifact/org.apache.logging.log4j/log4j-api/
-log4j = "2.25.5"
 # Check this on https://central.sonatype.com/artifact/com.google.code.gson/gson/
 gson = "2.14.0"
 # Check this on https://central.sonatype.com/artifact/org.apache.commons/commons-lang3/
@@ -54,10 +52,6 @@ loader = { group = "net.fabricmc", name = "fabric-loader", version.ref = "loader
 legacyLwjgl = { group = "legacy-lwjgl3", name = "legacy-lwjgl3", version.ref = "legacyLwjgl" }
 slf4jApi = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4jApi" }
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
-log4j-slf4j2-impl = { group = "org.apache.logging.log4j", name = "log4j-slf4j2-impl", version.ref = "log4j" }
-log4j-core = { group = "org.apache.logging.log4j", name = "log4j-core", version.ref = "log4j" }
-log4j-api = { group = "org.apache.logging.log4j", name = "log4j-api", version.ref = "log4j" }
-log4j-api12 = { group = "org.apache.logging.log4j", name = "log4j-1.2-api", version.ref = "log4j" }
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 commonsLang3 = { group = "org.apache.commons", name = "commons-lang3", version.ref = "commonsLang3" }
 # https://piston-data.mojang.com/v1/objects/43db9b498cb67058d2e12d394e6507722e71bb45/client.jar

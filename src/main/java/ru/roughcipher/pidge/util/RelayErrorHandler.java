@@ -1,8 +1,11 @@
 package ru.roughcipher.pidge.util;
 
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.middleman.StandardGuildMessageChannel;
 import ru.roughcipher.pidge.Pidge;
 import ru.roughcipher.pidge.telegram.TelegramClient;
+
+import java.util.EnumSet;
 
 public class RelayErrorHandler {
 	private static final int DISCORD_LIMIT = 2000;
@@ -16,10 +19,9 @@ public class RelayErrorHandler {
 		if (channel == null) return;
 		for (String fragment : MessageUtils.splitMessage(message, DISCORD_LIMIT)) {
 			try {
-				channel.sendMessage(fragment).queue(
-					null,
-					throwable -> logError("Discord", context, throwable.getMessage())
-				);
+				channel.sendMessage(fragment)
+					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+					.queue(null, throwable -> logError("Discord", context, throwable.getMessage()));
 			} catch (Exception e) {
 				logError("Discord", context, e.getMessage());
 			}
@@ -30,7 +32,9 @@ public class RelayErrorHandler {
 		if (channel == null) return;
 		for (String fragment : MessageUtils.splitMessage(message, DISCORD_LIMIT)) {
 			try {
-				channel.sendMessage(fragment).complete();
+				channel.sendMessage(fragment)
+					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+					.complete();
 			} catch (Exception e) {
 				logError("Discord", context, e.getMessage());
 			}

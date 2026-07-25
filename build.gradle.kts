@@ -60,10 +60,6 @@ dependencies {
 
 	implementation(libs.slf4jApi)
 	implementation(libs.guava)
-	implementation(libs.log4j.slf4j2.impl)
-	implementation(libs.log4j.core)
-	implementation(libs.log4j.api)
-	implementation(libs.log4j.api12)
 	implementation(libs.gson)
 
 	implementation(libs.commonsLang3)
