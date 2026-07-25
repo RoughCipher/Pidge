@@ -17,7 +17,8 @@ public class RelayErrorHandler {
 
 	public static void sendToDiscord(StandardGuildMessageChannel channel, String message, String context) {
 		if (channel == null) return;
-		for (String fragment : MessageUtils.splitMessage(message, DISCORD_LIMIT)) {
+		String escaped = MessageUtils.escapeDiscordMarkdown(message);
+		for (String fragment : MessageUtils.splitMessage(escaped, DISCORD_LIMIT)) {
 			try {
 				channel.sendMessage(fragment)
 					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
@@ -30,7 +31,8 @@ public class RelayErrorHandler {
 
 	public static void sendToDiscordSync(StandardGuildMessageChannel channel, String message, String context) {
 		if (channel == null) return;
-		for (String fragment : MessageUtils.splitMessage(message, DISCORD_LIMIT)) {
+		String escaped = MessageUtils.escapeDiscordMarkdown(message);
+		for (String fragment : MessageUtils.splitMessage(escaped, DISCORD_LIMIT)) {
 			try {
 				channel.sendMessage(fragment)
 					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))

@@ -50,4 +50,17 @@ public class MessageUtils {
 		}
 		return message;
 	}
+
+	public static String escapeDiscordMarkdown(String text) {
+		if (text == null) return null;
+		StringBuilder sb = new StringBuilder();
+		for (char c : text.toCharArray()) {
+			if (c == '*' || c == '_' || c == '~' || c == '|' || c == '`' || c == '\\' ||
+				c == '#' || c == '>' || c == '+' || c == '-' || c == '=') {
+				sb.append('\\');
+			}
+			sb.append(c);
+		}
+		return sb.toString();
+	}
 }
