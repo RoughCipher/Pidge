@@ -12,6 +12,7 @@ import net.minecraft.core.util.helper.UUIDHelper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.entity.player.PlayerServer;
 import ru.roughcipher.pidge.Pidge;
+import ru.roughcipher.pidge.util.MessageUtils;
 import ru.roughcipher.pidge.config.PidgeConfig;
 import ru.roughcipher.pidge.discord.DiscordChatRelay;
 import ru.roughcipher.pidge.util.BaseChatRelay;
@@ -227,6 +228,6 @@ public class TelegramClient {
 
 	public static void sendMessage(String text) {
 		if (!isInitialized()) return;
-		bot.execute(new SendMessage(PidgeConfig.getTelegramChatId(), text));
+		bot.execute(new SendMessage(PidgeConfig.getTelegramChatId(), MessageUtils.escapeTelegramMentions(text)));
 	}
 }

@@ -63,4 +63,9 @@ public class MessageUtils {
 		}
 		return sb.toString();
 	}
+
+	public static String escapeTelegramMentions(String text) {
+		if (text == null || text.isEmpty()) return text;
+		return text.replace("@", "@​");
+	}
 }
