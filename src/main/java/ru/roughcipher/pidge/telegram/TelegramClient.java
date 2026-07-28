@@ -81,7 +81,7 @@ public class TelegramClient {
 							continue;
 						}
 
-						// /whitelist reload
+						// remove @botusername
 						String normalized = text.trim();
 						if (botUsername != null) {
 							String suffix = "@" + botUsername;
@@ -89,6 +89,7 @@ public class TelegramClient {
 								normalized = normalized.substring(0, normalized.length() - suffix.length());
 							}
 						}
+						// /whitelist reload
 						if (normalized.equals("/whitelist reload")) {
 							Pidge.LOGGER.info("Telegram /whitelist reload requested by {}", authorName);
 							try {
@@ -100,6 +101,18 @@ public class TelegramClient {
 								Pidge.LOGGER.error("Telegram /whitelist reload failed", e);
 								bot.execute(new SendMessage(chatId, "Failed to reload whitelist: " + e.getMessage()));
 							}
+							continue;
+						}
+
+						// /whitelist on / off
+						if (normalized.equals("/whitelist on") || normalized.equals("/whitelist off")) {
+							boolean enable = normalized.equals("/whitelist on");
+							server.propertyManager.setProperty("white-list", enable);
+							server.playerList.whitelistEnforced = enable;
+							String key = enable ? "command.commands.whitelist.on.success" : "command.commands.whitelist.off.success";
+							String response = I18n.getInstance().translateKey(key);
+							bot.execute(new SendMessage(chatId, response));
+							Pidge.LOGGER.info("Telegram /whitelist {} executed by {}", normalized, authorName);
 							continue;
 						}
 

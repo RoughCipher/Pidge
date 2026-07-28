@@ -70,7 +70,9 @@ public class DiscordClient {
 									.addOption(OptionType.STRING, "player", "Player name", true),
 								new SubcommandData("reload", "Reload whitelist"),
 								new SubcommandData("remove", "Remove a player from whitelist")
-									.addOption(OptionType.STRING, "player", "Player name", true)
+									.addOption(OptionType.STRING, "player", "Player name", true),
+								new SubcommandData("on", "Enable whitelist"),
+								new SubcommandData("off", "Disable whitelist")
 							)
 					).queue(
 						success -> Pidge.LOGGER.info("Registered commands on guild {}", guild.getName()),
@@ -281,6 +283,26 @@ public class DiscordClient {
 								}
 								break;
 							}
+							case "on": {
+								server.propertyManager.setProperty("white-list", true);
+								server.playerList.whitelistEnforced = true;
+								String msg = I18n.getInstance().translateKey("command.commands.whitelist.on.success");
+								slash.reply(MessageUtils.escapeDiscordMarkdown(msg))
+									.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+									.queue();
+								Pidge.LOGGER.info("Discord /whitelist on executed by {} ({})", slash.getUser().getName(), authorId);
+								break;
+							}
+							case "off": {
+								server.propertyManager.setProperty("white-list", false);
+								server.playerList.whitelistEnforced = false;
+								String msg = I18n.getInstance().translateKey("command.commands.whitelist.off.success");
+								slash.reply(MessageUtils.escapeDiscordMarkdown(msg))
+									.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+									.queue();
+								Pidge.LOGGER.info("Discord /whitelist off executed by {} ({})", slash.getUser().getName(), authorId);
+								break;
+							}
 						}
 						return;
 					}
@@ -304,6 +326,35 @@ public class DiscordClient {
 				msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(response))
 					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
 					.queue();
+				return;
+			}
+
+			// /whitelist on / off
+			if (raw.equalsIgnoreCase("/whitelist on") || raw.equalsIgnoreCase("/whitelist off")) {
+				if (!PidgeConfig.getDiscordAdminIds().contains(authorId)) {
+					Pidge.LOGGER.warn("Discord unauthorized text /whitelist {} by {} ({})", raw, msg.getAuthor().getName(), authorId);
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("You are not authorized to use this command."))
+						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+						.queue();
+					return;
+				}
+				boolean enable = raw.equalsIgnoreCase("/whitelist on");
+				MinecraftServer server = MinecraftServer.getInstance();
+				if (server == null || server.playerList == null) {
+					Pidge.LOGGER.error("Discord text /whitelist {} failed: server not ready", raw);
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Server not ready."))
+						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+						.queue();
+					return;
+				}
+				server.propertyManager.setProperty("white-list", enable);
+				server.playerList.whitelistEnforced = enable;
+				String key = enable ? "command.commands.whitelist.on.success" : "command.commands.whitelist.off.success";
+				String response = I18n.getInstance().translateKey(key);
+				msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(response))
+					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+					.queue();
+				Pidge.LOGGER.info("Discord text /whitelist {} executed by {} ({})", raw, msg.getAuthor().getName(), authorId);
 				return;
 			}
 
