@@ -55,30 +55,30 @@ public class DiscordClient {
 			jda = builder.build().awaitReady();
 			Pidge.LOGGER.info("Discord client started");
 
+			jda.updateCommands().queue(
+				success -> Pidge.LOGGER.info("Cleared global Discord commands"),
+				failure -> Pidge.LOGGER.error("Failed to clear global Discord commands", failure)
+			);
+
 			StandardGuildMessageChannel ch = getChannel();
 			if (ch != null) {
 				Guild guild = ch.getGuild();
-				guild.retrieveCommands().queue(commands -> {
-					for (net.dv8tion.jda.api.interactions.commands.Command command : commands) {
-						command.delete().queue();
-					}
-					guild.updateCommands().addCommands(
-						Commands.slash("list", "Show online players"),
-						Commands.slash("whitelist", "Manage server whitelist")
-							.addSubcommands(
-								new SubcommandData("add", "Add a player to whitelist")
-									.addOption(OptionType.STRING, "player", "Player name", true),
-								new SubcommandData("reload", "Reload whitelist"),
-								new SubcommandData("remove", "Remove a player from whitelist")
-									.addOption(OptionType.STRING, "player", "Player name", true),
-								new SubcommandData("on", "Enable whitelist"),
-								new SubcommandData("off", "Disable whitelist")
-							)
-					).queue(
-						success -> Pidge.LOGGER.info("Registered commands on guild {}", guild.getName()),
-						failure -> Pidge.LOGGER.error("Failed to register commands on guild", failure)
-					);
-				});
+				guild.updateCommands().addCommands(
+					Commands.slash("list", "Show online players"),
+					Commands.slash("whitelist", "Manage server whitelist")
+						.addSubcommands(
+							new SubcommandData("add", "Add a player to whitelist")
+								.addOption(OptionType.STRING, "player", "Player name", true),
+							new SubcommandData("reload", "Reload whitelist"),
+							new SubcommandData("remove", "Remove a player from whitelist")
+								.addOption(OptionType.STRING, "player", "Player name", true),
+							new SubcommandData("on", "Enable whitelist"),
+							new SubcommandData("off", "Disable whitelist")
+						)
+				).queue(
+					success -> Pidge.LOGGER.info("Registered {} commands on guild {}", success.size(), guild.getName()),
+					failure -> Pidge.LOGGER.error("Failed to register commands on guild", failure)
+				);
 			} else {
 				Pidge.LOGGER.warn("Discord channel not found, cannot register commands");
 			}
