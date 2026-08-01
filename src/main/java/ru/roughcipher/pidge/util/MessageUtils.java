@@ -2,8 +2,15 @@ package ru.roughcipher.pidge.util;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MessageUtils {
+	// Discord emoji: <:name:id> или <a:name:id>
+	private static final Pattern DISCORD_CUSTOM_EMOJI = Pattern.compile(
+		"<a?:[a-zA-Z0-9_]+:\\d+>"
+	);
+
 	public static List<String> splitMessage(String text, int limit) {
 		List<String> parts = new ArrayList<>();
 		if (text.length() <= limit) {
@@ -53,13 +60,22 @@ public class MessageUtils {
 
 	public static String escapeDiscordMarkdown(String text) {
 		if (text == null) return null;
-		StringBuilder sb = new StringBuilder();
-		for (char c : text.toCharArray()) {
+		StringBuilder sb = new StringBuilder(text.length() * 2);
+		Matcher emoji = DISCORD_CUSTOM_EMOJI.matcher(text);
+		int i = 0;
+		while (i < text.length()) {
+			if (emoji.find(i) && emoji.start() == i) {
+				sb.append(emoji.group());
+				i = emoji.end();
+				continue;
+			}
+			char c = text.charAt(i);
 			if (c == '*' || c == '_' || c == '~' || c == '|' || c == '`' || c == '\\' ||
 				c == '#' || c == '>' || c == '+' || c == '-' || c == '=') {
 				sb.append('\\');
 			}
 			sb.append(c);
+			i++;
 		}
 		return sb.toString();
 	}
