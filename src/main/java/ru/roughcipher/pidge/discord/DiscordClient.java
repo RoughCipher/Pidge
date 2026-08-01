@@ -9,9 +9,6 @@ import net.dv8tion.jda.api.events.GenericEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.EventListener;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.minecraft.core.lang.I18n;
 import net.minecraft.core.net.ChatEmotes;
@@ -25,6 +22,10 @@ import ru.roughcipher.pidge.config.PidgeConfig;
 import ru.roughcipher.pidge.telegram.TelegramChatRelay;
 import ru.roughcipher.pidge.util.BaseChatRelay;
 import ru.roughcipher.pidge.util.MessageUtils;
+import ru.roughcipher.pidge.util.ProxyUtils;
+import ru.roughcipher.pidge.discord.locale.CommandLocales;
+
+import okhttp3.OkHttpClient;
 
 import java.util.EnumSet;
 
@@ -41,6 +42,15 @@ public class DiscordClient {
 				GatewayIntent.GUILD_MESSAGES,
 				GatewayIntent.MESSAGE_CONTENT
 			);
+
+			//HTTP/HTTPS/SOCKS-прокси
+			ProxyUtils.ParsedProxy parsedProxy = ProxyUtils.parse(PidgeConfig.getProxy());
+			if (parsedProxy != null) {
+				OkHttpClient.Builder httpBuilder = new OkHttpClient.Builder();
+				ProxyUtils.applyTo(parsedProxy, httpBuilder, "Discord");
+				builder.setHttpClientBuilder(httpBuilder);
+			}
+
 			builder.disableCache(
 				net.dv8tion.jda.api.utils.cache.CacheFlag.ACTIVITY,
 				net.dv8tion.jda.api.utils.cache.CacheFlag.VOICE_STATE,
@@ -63,22 +73,12 @@ public class DiscordClient {
 			StandardGuildMessageChannel ch = getChannel();
 			if (ch != null) {
 				Guild guild = ch.getGuild();
-				guild.updateCommands().addCommands(
-					Commands.slash("list", "Show online players"),
-					Commands.slash("whitelist", "Manage server whitelist")
-						.addSubcommands(
-							new SubcommandData("add", "Add a player to whitelist")
-								.addOption(OptionType.STRING, "player", "Player name", true),
-							new SubcommandData("reload", "Reload whitelist"),
-							new SubcommandData("remove", "Remove a player from whitelist")
-								.addOption(OptionType.STRING, "player", "Player name", true),
-							new SubcommandData("on", "Enable whitelist"),
-							new SubcommandData("off", "Disable whitelist")
-						)
-				).queue(
-					success -> Pidge.LOGGER.info("Registered {} commands on guild {}", success.size(), guild.getName()),
-					failure -> Pidge.LOGGER.error("Failed to register commands on guild", failure)
-				);
+				guild.updateCommands()
+					.addCommands(CommandLocales.buildCommands())
+					.queue(
+						success -> Pidge.LOGGER.info("Registered {} commands on guild {}", success.size(), guild.getName()),
+						failure -> Pidge.LOGGER.error("Failed to register commands on guild", failure)
+					);
 			} else {
 				Pidge.LOGGER.warn("Discord channel not found, cannot register commands");
 			}

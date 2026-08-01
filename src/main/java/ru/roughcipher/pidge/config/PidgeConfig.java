@@ -34,6 +34,21 @@ public class PidgeConfig {
 
 	private static String serverName = "BTA Server";
 
+	// Допустимые примеры:
+	//   ""— без прокси
+	//   "http://proxy.example.com:8080"— HTTP, без авторизации
+	//   "http://user:pass@proxy.example.com:8080"— HTTP с авторизацией
+	//   "https://proxy.example.com:443"— HTTPS, без авторизации
+	//   "https://user:pass@proxy.example.com:443"— HTTPS с авторизацией
+	//   "socks://proxy.example.com:1080"— SOCKS4/5, без авторизации
+	//   "socks://user:pass@proxy.example.com:1080"— SOCKS5 с авторизацией
+	//   "socks5://proxy.example.com:1080"— то же, что socks://
+	//   "socks5://user:pass@proxy.example.com:1080"
+	//   "socks4://proxy.example.com:1080"— SOCKS4 (логин/пароль не используются)
+	// Логин/пароль могут быть URL-encoded (p%40ss для p@ss).
+	// Порты по умолчанию: HTTP 80, HTTPS 443, SOCKS 1080.
+	private static String proxy = "";
+
 	public static boolean isDiscordEnabled() { return discordEnable; }
 	public static String getDiscordToken() { return discordToken; }
 	public static String getDiscordChannel() { return discordChannel; }
@@ -45,6 +60,8 @@ public class PidgeConfig {
 	public static List<String> getTelegramAdminIds() { return telegramAdminIds; }
 
 	public static String getServerName() { return serverName; }
+
+	public static String getProxy() { return proxy; }
 
 	public static void load() {
 		File file = getFilePath();
@@ -108,6 +125,9 @@ public class PidgeConfig {
 		telegramToken = get(object, "telegram_token", telegramToken);
 		telegramChatId = get(object, "telegram_chat_id", telegramChatId);
 		telegramAdminIds = get(object, "telegram_admin_ids", telegramAdminIds);
+
+		proxy = get(object, "proxy", proxy);
+		if (proxy == null) proxy = "";
 	}
 
 	private static File getFilePath() {
@@ -126,6 +146,13 @@ public class PidgeConfig {
 		Pidge.info("telegram.enable = " + telegramEnable);
 		Pidge.info("discord.admin_ids = " + discordAdminIds);
 		Pidge.info("telegram.admin_ids = " + telegramAdminIds);
+		if (proxy == null || proxy.isEmpty()) {
+			Pidge.info("proxy = (disabled)");
+		} else {
+			// redact credentials in logs
+			String safe = proxy.replaceAll("://[^@/]+@", "://****:****@");
+			Pidge.info("proxy = " + safe);
+		}
 	}
 
 	static {

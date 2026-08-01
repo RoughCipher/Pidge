@@ -16,6 +16,9 @@ import ru.roughcipher.pidge.util.MessageUtils;
 import ru.roughcipher.pidge.config.PidgeConfig;
 import ru.roughcipher.pidge.discord.DiscordChatRelay;
 import ru.roughcipher.pidge.util.BaseChatRelay;
+import ru.roughcipher.pidge.util.ProxyUtils;
+
+import okhttp3.OkHttpClient;
 
 public class TelegramClient {
 	private static TelegramBot bot;
@@ -25,7 +28,15 @@ public class TelegramClient {
 	public static boolean init() {
 		if (!PidgeConfig.isTelegramEnabled()) return false;
 		try {
-			bot = new TelegramBot(PidgeConfig.getTelegramToken());
+			ProxyUtils.ParsedProxy parsedProxy = ProxyUtils.parse(PidgeConfig.getProxy());
+			if (parsedProxy != null) {
+				OkHttpClient httpClient = ProxyUtils.buildClient(parsedProxy, "Telegram");
+				bot = new TelegramBot.Builder(PidgeConfig.getTelegramToken())
+					.okHttpClient(httpClient)
+					.build();
+			} else {
+				bot = new TelegramBot(PidgeConfig.getTelegramToken());
+			}
 
 			GetMeResponse me = bot.execute(new GetMe());
 			if (me.isOk() && me.user() != null) {
