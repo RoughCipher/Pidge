@@ -69,6 +69,8 @@ public abstract class BaseChatRelay {
 	}
 
 	public void sendJoinLeaveMessage(String username, boolean joined) {
+		if (joined && !MessageConfig.isPlayerJoinedEnabled()) return;
+		if (!joined && !MessageConfig.isPlayerLeftEnabled()) return;
 		String text;
 		if (joined && MessageConfig.getPlayerJoined() != null) {
 			text = String.format(MessageConfig.getPlayerJoined(), username);
@@ -84,6 +86,7 @@ public abstract class BaseChatRelay {
 	}
 
 	public void sendKickMessage(String username, String reason) {
+		if (!MessageConfig.isPlayerKickedEnabled()) return;
 		String text;
 		if (MessageConfig.getPlayerKicked() != null) {
 			String reasonText = (reason != null && !reason.isEmpty()) ? reason : "";
@@ -99,6 +102,8 @@ public abstract class BaseChatRelay {
 	}
 
 	public void sendDeathMessage(String translationKey, Object[] args, boolean isPlayer) {
+		if (isPlayer && !MessageConfig.isDeathEnabled()) return;
+		if (!isPlayer && !MessageConfig.isMobDeathEnabled()) return;
 		String pattern = I18n.getInstance().translateKey(translationKey);
 		String text = String.format(pattern, args);
 		String clean = MessageUtils.stripColorCodes(text);
@@ -107,22 +112,26 @@ public abstract class BaseChatRelay {
 	}
 
 	public void sendSayMessage(String senderName, String message) {
+		if (!MessageConfig.isSayEnabled()) return;
 		String clean = MessageUtils.stripColorCodes("[" + senderName + "] " + message);
 		sendRaw(clean, "say");
 	}
 
 	public void sendMeMessage(String playerName, String message) {
+		if (!MessageConfig.isMeEnabled()) return;
 		String clean = MessageUtils.stripColorCodes("* " + playerName + " " + message);
 		sendRaw(clean, "me");
 	}
 
 	public void sendServerStartMessage() {
+		if (!MessageConfig.isServerStartEnabled()) return;
 		String version = Pidge.getBTAVersion();
 		String text = PidgeConfig.getServerName() + " (v" + version + ")\n" + MessageConfig.getServerStart();
 		sendRaw(MessageUtils.withIcon(MessageConfig.getStartIcon(), text), "start");
 	}
 
 	public void sendServerSleepMessage() {
+		if (!MessageConfig.isNightSkippedEnabled()) return;
 		String text = MessageConfig.getNightSkipped();
 		sendRaw(MessageUtils.withIcon(MessageConfig.getNightSkippedIcon(), text), "sleep");
 	}

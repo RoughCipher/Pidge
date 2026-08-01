@@ -32,6 +32,17 @@ public class MessageConfig {
 	private static String mobDeathIcon = "☠";
 	private static String gameChatIcon = "✉";
 
+	private static boolean enablePlayerJoined = true;
+	private static boolean enablePlayerLeft = true;
+	private static boolean enablePlayerKicked = true;
+	private static boolean enableServerStart = true;
+	private static boolean enableServerStop = true;
+	private static boolean enableNightSkipped = true;
+	private static boolean enableDeath = true;
+	private static boolean enableMobDeath = true;
+	private static boolean enableSay = true;
+	private static boolean enableMe = true;
+
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
 	static {
@@ -61,6 +72,17 @@ public class MessageConfig {
 				if (data.death_icon != null) deathIcon = data.death_icon;
 				if (data.mob_death_icon != null) mobDeathIcon = data.mob_death_icon;
 				if (data.game_chat_icon != null) gameChatIcon = data.game_chat_icon;
+
+				if (data.enable_player_joined != null) enablePlayerJoined = data.enable_player_joined;
+				if (data.enable_player_left != null) enablePlayerLeft = data.enable_player_left;
+				if (data.enable_player_kicked != null) enablePlayerKicked = data.enable_player_kicked;
+				if (data.enable_server_start != null) enableServerStart = data.enable_server_start;
+				if (data.enable_server_stop != null) enableServerStop = data.enable_server_stop;
+				if (data.enable_night_skipped != null) enableNightSkipped = data.enable_night_skipped;
+				if (data.enable_death != null) enableDeath = data.enable_death;
+				if (data.enable_mob_death != null) enableMobDeath = data.enable_mob_death;
+				if (data.enable_say != null) enableSay = data.enable_say;
+				if (data.enable_me != null) enableMe = data.enable_me;
 			}
 		} catch (IOException e) {
 			Pidge.LOGGER.error("Failed to load message config, using defaults", e);
@@ -85,6 +107,17 @@ public class MessageConfig {
 		data.death_icon = deathIcon;
 		data.mob_death_icon = mobDeathIcon;
 		data.game_chat_icon = gameChatIcon;
+
+		data.enable_player_joined = enablePlayerJoined;
+		data.enable_player_left = enablePlayerLeft;
+		data.enable_player_kicked = enablePlayerKicked;
+		data.enable_server_start = enableServerStart;
+		data.enable_server_stop = enableServerStop;
+		data.enable_night_skipped = enableNightSkipped;
+		data.enable_death = enableDeath;
+		data.enable_mob_death = enableMobDeath;
+		data.enable_say = enableSay;
+		data.enable_me = enableMe;
 
 		try {
 			Files.createDirectories(CONFIG_PATH.getParent());
@@ -117,13 +150,28 @@ public class MessageConfig {
 	public static String getMobDeathIcon() { return mobDeathIcon; }
 	public static String getGameChatIcon() { return gameChatIcon; }
 
+	public static boolean isPlayerJoinedEnabled() { return enablePlayerJoined; }
+	public static boolean isPlayerLeftEnabled() { return enablePlayerLeft; }
+	public static boolean isPlayerKickedEnabled() { return enablePlayerKicked; }
+	public static boolean isServerStartEnabled() { return enableServerStart; }
+	public static boolean isServerStopEnabled() { return enableServerStop; }
+	public static boolean isNightSkippedEnabled() { return enableNightSkipped; }
+	public static boolean isDeathEnabled() { return enableDeath; }
+	public static boolean isMobDeathEnabled() { return enableMobDeath; }
+	public static boolean isSayEnabled() { return enableSay; }
+	public static boolean isMeEnabled() { return enableMe; }
+
 	public static void printConfigValues() {
-		Pidge.info("server_start = " + serverStart);
-		Pidge.info("server_stop = " + serverStop);
-		Pidge.info("night_skipped = " + nightSkipped);
-		Pidge.info("player_joined = " + (playerJoined == null ? "(use default)" : playerJoined));
-		Pidge.info("player_left = " + (playerLeft == null ? "(use default)" : playerLeft));
-		Pidge.info("player_kicked = " + (playerKicked == null ? "(use default)" : playerKicked));
+		Pidge.info("server_start = " + serverStart + " (enabled=" + enableServerStart + ")");
+		Pidge.info("server_stop = " + serverStop + " (enabled=" + enableServerStop + ")");
+		Pidge.info("night_skipped = " + nightSkipped + " (enabled=" + enableNightSkipped + ")");
+		Pidge.info("player_joined = " + (playerJoined == null ? "(use default)" : playerJoined) + " (enabled=" + enablePlayerJoined + ")");
+		Pidge.info("player_left = " + (playerLeft == null ? "(use default)" : playerLeft) + " (enabled=" + enablePlayerLeft + ")");
+		Pidge.info("player_kicked = " + (playerKicked == null ? "(use default)" : playerKicked) + " (enabled=" + enablePlayerKicked + ")");
+		Pidge.info("enable_death = " + enableDeath);
+		Pidge.info("enable_mob_death = " + enableMobDeath);
+		Pidge.info("enable_say = " + enableSay);
+		Pidge.info("enable_me = " + enableMe);
 		Pidge.info("start_icon = \"" + startIcon + "\"");
 		Pidge.info("stop_icon = \"" + stopIcon + "\"");
 		Pidge.info("night_skipped_icon = \"" + nightSkippedIcon + "\"");
@@ -151,5 +199,16 @@ public class MessageConfig {
 		String death_icon;
 		String mob_death_icon;
 		String game_chat_icon;
+
+		Boolean enable_player_joined;
+		Boolean enable_player_left;
+		Boolean enable_player_kicked;
+		Boolean enable_server_start;
+		Boolean enable_server_stop;
+		Boolean enable_night_skipped;
+		Boolean enable_death;
+		Boolean enable_mob_death;
+		Boolean enable_say;
+		Boolean enable_me;
 	}
 }
