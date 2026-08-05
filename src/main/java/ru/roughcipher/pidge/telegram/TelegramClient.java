@@ -213,6 +213,91 @@ public class TelegramClient {
 							continue;
 						}
 
+						// /ban <player>
+						if (lower.startsWith("/ban ") || lower.startsWith("/ban@")) {
+							String[] parts = text.trim().split(" ");
+							final String playerName;
+							playerName = parts.length >= 2 ? parts[1] : "";
+							if (playerName.isEmpty()) {
+								bot.execute(new SendMessage(chatId, "Usage: /ban <player>"));
+								continue;
+							}
+							if (playerName.length() > 16) {
+								bot.execute(new SendMessage(chatId, "Player name must be 16 characters or less."));
+								continue;
+							}
+							Pidge.LOGGER.info("Telegram /ban {} requested by {}", playerName, authorName);
+
+							PlayerServer player = server.playerList.getPlayerEntity(playerName);
+							if (player != null) {
+								server.playerList.banPlayer(player.uuid);
+								player.playerNetServerHandler.kickPlayer("Banned by admin");
+								String successMsg = I18n.getInstance().translateKeyAndFormat("command.commands.ban.success", player.username);
+								Pidge.LOGGER.info("Telegram /ban {} succeeded (online)", playerName);
+								bot.execute(new SendMessage(chatId, successMsg));
+							} else {
+								try {
+									UUIDHelper.runConversionAction(playerName,
+										(uuid) -> {
+											server.playerList.banPlayer(uuid);
+											String successMsg2 = I18n.getInstance().translateKeyAndFormat(
+												"command.commands.ban.username.success", playerName);
+											Pidge.LOGGER.info("Telegram /ban {} succeeded (offline)", playerName);
+											bot.execute(new SendMessage(chatId, successMsg2));
+										},
+										(username) -> {
+											String failMsg = I18n.getInstance().translateKeyAndFormat(
+												"command.commands.ban.username.fail.wrong_name", playerName);
+											Pidge.LOGGER.warn("Telegram /ban {} failed: wrong name", playerName);
+											bot.execute(new SendMessage(chatId, failMsg));
+										}
+									);
+								} catch (Exception e) {
+									Pidge.LOGGER.error("Telegram /ban {} failed with exception", playerName, e);
+									bot.execute(new SendMessage(chatId, "Failed to ban player: " + e.getMessage()));
+								}
+							}
+							continue;
+						}
+
+						// /unban <player>
+						if (lower.startsWith("/unban ") || lower.startsWith("/unban@")) {
+							String[] parts = text.trim().split(" ");
+							final String playerName;
+							playerName = parts.length >= 2 ? parts[1] : "";
+							if (playerName.isEmpty()) {
+								bot.execute(new SendMessage(chatId, "Usage: /unban <player>"));
+								continue;
+							}
+							if (playerName.length() > 16) {
+								bot.execute(new SendMessage(chatId, "Player name must be 16 characters or less."));
+								continue;
+							}
+							Pidge.LOGGER.info("Telegram /unban {} requested by {}", playerName, authorName);
+
+							try {
+								UUIDHelper.runConversionAction(playerName,
+									(uuid) -> {
+										server.playerList.pardonPlayer(uuid);
+										String successMsg = I18n.getInstance().translateKeyAndFormat(
+											"command.commands.unban.username.success", playerName);
+										Pidge.LOGGER.info("Telegram /unban {} succeeded", playerName);
+										bot.execute(new SendMessage(chatId, successMsg));
+									},
+									(username) -> {
+										String failMsg = I18n.getInstance().translateKeyAndFormat(
+											"command.commands.unban.username.fail.wrong_name", playerName);
+										Pidge.LOGGER.warn("Telegram /unban {} failed: wrong name", playerName);
+										bot.execute(new SendMessage(chatId, failMsg));
+									}
+								);
+							} catch (Exception e) {
+								Pidge.LOGGER.error("Telegram /unban {} failed with exception", playerName, e);
+								bot.execute(new SendMessage(chatId, "Failed to unban player: " + e.getMessage()));
+							}
+							continue;
+						}
+
 						String username = message.from().username();
 						String author = (username != null && !username.isEmpty())
 							? username

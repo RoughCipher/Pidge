@@ -306,6 +306,154 @@ public class DiscordClient {
 						}
 						return;
 					}
+
+					case "ban": {
+						String authorId = slash.getUser().getId();
+						if (!PidgeConfig.getDiscordAdminIds().contains(authorId)) {
+							Pidge.LOGGER.warn("Discord unauthorized /ban by {} ({})", slash.getUser().getName(), authorId);
+							slash.reply(MessageUtils.escapeDiscordMarkdown("You are not authorized to use this command."))
+								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+								.setEphemeral(true)
+								.queue();
+							return;
+						}
+						MinecraftServer server = MinecraftServer.getInstance();
+						if (server == null || server.playerList == null) {
+							Pidge.LOGGER.error("Discord /ban failed: server not ready");
+							slash.reply(MessageUtils.escapeDiscordMarkdown("Server not ready."))
+								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+								.setEphemeral(true)
+								.queue();
+							return;
+						}
+						var option = slash.getOption("player");
+						if (option == null) {
+							slash.reply(MessageUtils.escapeDiscordMarkdown("Please specify a player name."))
+								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+								.setEphemeral(true)
+								.queue();
+							return;
+						}
+						String playerName = option.getAsString();
+						if (playerName.length() > 16) {
+							slash.reply(MessageUtils.escapeDiscordMarkdown("Player name must be 16 characters or less."))
+								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+								.setEphemeral(true)
+								.queue();
+							return;
+						}
+						String authorName = slash.getUser().getName() + " (" + authorId + ")";
+						Pidge.LOGGER.info("Discord /ban {} requested by {}", playerName, authorName);
+
+						PlayerServer player = server.playerList.getPlayerEntity(playerName);
+						if (player != null) {
+							server.playerList.banPlayer(player.uuid);
+							player.playerNetServerHandler.kickPlayer("Banned by admin");
+							String successMsg = I18n.getInstance().translateKeyAndFormat("command.commands.ban.success", player.username);
+							Pidge.LOGGER.info("Discord /ban {} succeeded (online)", playerName);
+							slash.reply(MessageUtils.escapeDiscordMarkdown(successMsg))
+								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+								.queue();
+						} else {
+							try {
+								UUIDHelper.runConversionAction(playerName,
+									(uuid) -> {
+										server.playerList.banPlayer(uuid);
+										String successMsg2 = I18n.getInstance().translateKeyAndFormat(
+											"command.commands.ban.username.success", playerName);
+										Pidge.LOGGER.info("Discord /ban {} succeeded (offline)", playerName);
+										slash.reply(MessageUtils.escapeDiscordMarkdown(successMsg2))
+											.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+											.queue();
+									},
+									(username) -> {
+										String failMsg = I18n.getInstance().translateKeyAndFormat(
+											"command.commands.ban.username.fail.wrong_name", playerName);
+										Pidge.LOGGER.warn("Discord /ban {} failed: wrong name", playerName);
+										slash.reply(MessageUtils.escapeDiscordMarkdown(failMsg))
+											.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+											.setEphemeral(true)
+											.queue();
+									}
+								);
+							} catch (Exception e) {
+								Pidge.LOGGER.error("Discord /ban {} failed with exception", playerName, e);
+								slash.reply(MessageUtils.escapeDiscordMarkdown("Failed to ban player: " + e.getMessage()))
+									.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+									.setEphemeral(true)
+									.queue();
+							}
+						}
+						return;
+					}
+					case "unban": {
+						String authorId = slash.getUser().getId();
+						if (!PidgeConfig.getDiscordAdminIds().contains(authorId)) {
+							Pidge.LOGGER.warn("Discord unauthorized /unban by {} ({})", slash.getUser().getName(), authorId);
+							slash.reply(MessageUtils.escapeDiscordMarkdown("You are not authorized to use this command."))
+								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+								.setEphemeral(true)
+								.queue();
+							return;
+						}
+						MinecraftServer server = MinecraftServer.getInstance();
+						if (server == null || server.playerList == null) {
+							Pidge.LOGGER.error("Discord /unban failed: server not ready");
+							slash.reply(MessageUtils.escapeDiscordMarkdown("Server not ready."))
+								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+								.setEphemeral(true)
+								.queue();
+							return;
+						}
+						var option = slash.getOption("player");
+						if (option == null) {
+							slash.reply(MessageUtils.escapeDiscordMarkdown("Please specify a player name."))
+								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+								.setEphemeral(true)
+								.queue();
+							return;
+						}
+						String playerName = option.getAsString();
+						if (playerName.length() > 16) {
+							slash.reply(MessageUtils.escapeDiscordMarkdown("Player name must be 16 characters or less."))
+								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+								.setEphemeral(true)
+								.queue();
+							return;
+						}
+						String authorName = slash.getUser().getName() + " (" + authorId + ")";
+						Pidge.LOGGER.info("Discord /unban {} requested by {}", playerName, authorName);
+
+						try {
+							UUIDHelper.runConversionAction(playerName,
+								(uuid) -> {
+									server.playerList.pardonPlayer(uuid);
+									String successMsg = I18n.getInstance().translateKeyAndFormat(
+										"command.commands.unban.username.success", playerName);
+									Pidge.LOGGER.info("Discord /unban {} succeeded", playerName);
+									slash.reply(MessageUtils.escapeDiscordMarkdown(successMsg))
+										.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+										.queue();
+								},
+								(username) -> {
+									String failMsg = I18n.getInstance().translateKeyAndFormat(
+										"command.commands.unban.username.fail.wrong_name", playerName);
+									Pidge.LOGGER.warn("Discord /unban {} failed: wrong name", playerName);
+									slash.reply(MessageUtils.escapeDiscordMarkdown(failMsg))
+										.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+										.setEphemeral(true)
+										.queue();
+								}
+							);
+						} catch (Exception e) {
+							Pidge.LOGGER.error("Discord /unban {} failed with exception", playerName, e);
+							slash.reply(MessageUtils.escapeDiscordMarkdown("Failed to unban player: " + e.getMessage()))
+								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+								.setEphemeral(true)
+								.queue();
+						}
+						return;
+					}
 				}
 				return;
 			}
@@ -446,6 +594,62 @@ public class DiscordClient {
 				return;
 			}
 
+			// /ban <player>
+			if (raw.toLowerCase().startsWith("/ban ")) {
+				if (!PidgeConfig.getDiscordAdminIds().contains(authorId)) {
+					Pidge.LOGGER.warn("Discord unauthorized text /ban by {} ({})", msg.getAuthor().getName(), authorId);
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("You are not authorized to use this command."))
+						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+						.queue();
+					return;
+				}
+				String[] parts = raw.split(" ");
+				if (parts.length < 2) {
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Usage: /ban <player>"))
+						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+						.queue();
+					return;
+				}
+				String playerName = parts[1];
+				if (playerName.length() > 16) {
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Player name must be 16 characters or less."))
+						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+						.queue();
+					return;
+				}
+				Pidge.LOGGER.info("Discord text /ban {} requested by {} ({})", playerName, msg.getAuthor().getName(), authorId);
+				handleBan(msg, playerName);
+				return;
+			}
+
+			// /unban <player>
+			if (raw.toLowerCase().startsWith("/unban ")) {
+				if (!PidgeConfig.getDiscordAdminIds().contains(authorId)) {
+					Pidge.LOGGER.warn("Discord unauthorized text /unban by {} ({})", msg.getAuthor().getName(), authorId);
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("You are not authorized to use this command."))
+						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+						.queue();
+					return;
+				}
+				String[] parts = raw.split(" ");
+				if (parts.length < 2) {
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Usage: /unban <player>"))
+						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+						.queue();
+					return;
+				}
+				String playerName = parts[1];
+				if (playerName.length() > 16) {
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Player name must be 16 characters or less."))
+						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+						.queue();
+					return;
+				}
+				Pidge.LOGGER.info("Discord text /unban {} requested by {} ({})", playerName, msg.getAuthor().getName(), authorId);
+				handleUnban(msg, playerName);
+				return;
+			}
+
 			String author = msg.getAuthor().getName();
 			String content = ChatEmotes.process(msg.getMessage().getContentStripped());
 			DiscordChatRelay.INSTANCE.sendToMinecraft(author, content);
@@ -531,5 +735,89 @@ public class DiscordClient {
 				}
 			}
 		}
+
+		private void handleBan(MessageReceivedEvent msg, String playerName) {
+			MinecraftServer server = MinecraftServer.getInstance();
+			if (server == null || server.playerList == null) {
+				msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Server not ready."))
+					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+					.queue();
+				return;
+			}
+			PlayerServer player = server.playerList.getPlayerEntity(playerName);
+			if (player != null) {
+				server.playerList.banPlayer(player.uuid);
+				player.playerNetServerHandler.kickPlayer("Banned by admin");
+				String successMsg = I18n.getInstance().translateKeyAndFormat("command.commands.ban.success", player.username);
+				Pidge.LOGGER.info("Discord text /ban {} succeeded (online)", playerName);
+				msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(successMsg))
+					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+					.queue();
+			} else {
+				try {
+					UUIDHelper.runConversionAction(playerName,
+						(uuid) -> {
+							server.playerList.banPlayer(uuid);
+							String successMsg2 = I18n.getInstance().translateKeyAndFormat(
+								"command.commands.ban.username.success", playerName);
+							Pidge.LOGGER.info("Discord text /ban {} succeeded (offline)", playerName);
+							msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(successMsg2))
+								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+								.queue();
+						},
+						(username) -> {
+							String failMsg = I18n.getInstance().translateKeyAndFormat(
+								"command.commands.ban.username.fail.wrong_name", playerName);
+							Pidge.LOGGER.warn("Discord text /ban {} failed: wrong name", playerName);
+							msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(failMsg))
+								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+								.queue();
+						}
+					);
+				} catch (Exception e) {
+					Pidge.LOGGER.error("Discord text /ban {} failed with exception", playerName, e);
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Failed to ban player: " + e.getMessage()))
+						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+						.queue();
+				}
+			}
+		}
+
+		private void handleUnban(MessageReceivedEvent msg, String playerName) {
+			MinecraftServer server = MinecraftServer.getInstance();
+			if (server == null || server.playerList == null) {
+				msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Server not ready."))
+					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+					.queue();
+				return;
+			}
+			try {
+				UUIDHelper.runConversionAction(playerName,
+					(uuid) -> {
+						server.playerList.pardonPlayer(uuid);
+						String successMsg = I18n.getInstance().translateKeyAndFormat(
+							"command.commands.unban.username.success", playerName);
+						Pidge.LOGGER.info("Discord text /unban {} succeeded", playerName);
+						msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(successMsg))
+							.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+							.queue();
+					},
+					(username) -> {
+						String failMsg = I18n.getInstance().translateKeyAndFormat(
+							"command.commands.unban.username.fail.wrong_name", playerName);
+						Pidge.LOGGER.warn("Discord text /unban {} failed: wrong name", playerName);
+						msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(failMsg))
+							.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+							.queue();
+					}
+				);
+			} catch (Exception e) {
+				Pidge.LOGGER.error("Discord text /unban {} failed with exception", playerName, e);
+				msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Failed to unban player: " + e.getMessage()))
+					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+					.queue();
+			}
+		}
 	}
 }
+

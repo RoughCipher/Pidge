@@ -28,11 +28,6 @@ public final class RussianLocale implements CommandLocale {
 	}
 
 	@Override
-	public String whitelistAddPlayerOption() {
-		return "Имя игрока";
-	}
-
-	@Override
 	public String whitelistReloadDescription() {
 		return "Перезагрузить белый список";
 	}
@@ -43,11 +38,6 @@ public final class RussianLocale implements CommandLocale {
 	}
 
 	@Override
-	public String whitelistRemovePlayerOption() {
-		return "Имя игрока";
-	}
-
-	@Override
 	public String whitelistOnDescription() {
 		return "Включить белый список";
 	}
@@ -55,5 +45,20 @@ public final class RussianLocale implements CommandLocale {
 	@Override
 	public String whitelistOffDescription() {
 		return "Выключить белый список";
+	}
+
+	@Override
+	public String banDescription() {
+		return "Заблокировать игрока";
+	}
+
+	@Override
+	public String unbanDescription() {
+		return "Разблокировать игрока";
+	}
+
+	@Override
+	public String playerOption() {
+		return "Имя игрока";
 	}
 }

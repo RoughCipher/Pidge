@@ -11,15 +11,17 @@ public interface CommandLocale {
 
 	String whitelistAddDescription();
 
-	String whitelistAddPlayerOption();
-
 	String whitelistReloadDescription();
 
 	String whitelistRemoveDescription();
 
-	String whitelistRemovePlayerOption();
-
 	String whitelistOnDescription();
 
 	String whitelistOffDescription();
+
+	String banDescription();
+
+	String unbanDescription();
+
+	String playerOption();
 }

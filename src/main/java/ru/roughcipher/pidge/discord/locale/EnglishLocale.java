@@ -28,11 +28,6 @@ public final class EnglishLocale implements CommandLocale {
 	}
 
 	@Override
-	public String whitelistAddPlayerOption() {
-		return "Player name";
-	}
-
-	@Override
 	public String whitelistReloadDescription() {
 		return "Reload whitelist";
 	}
@@ -43,11 +38,6 @@ public final class EnglishLocale implements CommandLocale {
 	}
 
 	@Override
-	public String whitelistRemovePlayerOption() {
-		return "Player name";
-	}
-
-	@Override
 	public String whitelistOnDescription() {
 		return "Enable whitelist";
 	}
@@ -55,5 +45,20 @@ public final class EnglishLocale implements CommandLocale {
 	@Override
 	public String whitelistOffDescription() {
 		return "Disable whitelist";
+	}
+
+	@Override
+	public String banDescription() {
+		return "Ban a player";
+	}
+
+	@Override
+	public String unbanDescription() {
+		return "Unban a player";
+	}
+
+	@Override
+	public String playerOption() {
+		return "Player name";
 	}
 }

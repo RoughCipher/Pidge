@@ -25,29 +25,29 @@ public final class CommandLocales {
 		Map<DiscordLocale, String> listDesc = map(CommandLocale::listDescription);
 		Map<DiscordLocale, String> wlDesc = map(CommandLocale::whitelistDescription);
 		Map<DiscordLocale, String> addDesc = map(CommandLocale::whitelistAddDescription);
-		Map<DiscordLocale, String> addPlayer = map(CommandLocale::whitelistAddPlayerOption);
 		Map<DiscordLocale, String> reloadDesc = map(CommandLocale::whitelistReloadDescription);
 		Map<DiscordLocale, String> removeDesc = map(CommandLocale::whitelistRemoveDescription);
-		Map<DiscordLocale, String> removePlayer = map(CommandLocale::whitelistRemovePlayerOption);
 		Map<DiscordLocale, String> onDesc = map(CommandLocale::whitelistOnDescription);
 		Map<DiscordLocale, String> offDesc = map(CommandLocale::whitelistOffDescription);
+		Map<DiscordLocale, String> banDesc = map(CommandLocale::banDescription);
+		Map<DiscordLocale, String> unbanDesc = map(CommandLocale::unbanDescription);
+		Map<DiscordLocale, String> playerOpt = map(CommandLocale::playerOption);
 
 		SlashCommandData list = Commands.slash("list", en.listDescription())
 			.setDescriptionLocalizations(listDesc);
 
-		OptionData addPlayerOpt = new OptionData(OptionType.STRING, "player", en.whitelistAddPlayerOption(), true)
-			.setDescriptionLocalizations(addPlayer);
-		OptionData removePlayerOpt = new OptionData(OptionType.STRING, "player", en.whitelistRemovePlayerOption(), true)
-			.setDescriptionLocalizations(removePlayer);
+		OptionData playerOption = new OptionData(OptionType.STRING, "player", en.playerOption(), true)
+			.setDescriptionLocalizations(playerOpt);
 
 		SubcommandData add = new SubcommandData("add", en.whitelistAddDescription())
 			.setDescriptionLocalizations(addDesc)
-			.addOptions(addPlayerOpt);
+			.addOptions(playerOption);
 		SubcommandData reload = new SubcommandData("reload", en.whitelistReloadDescription())
 			.setDescriptionLocalizations(reloadDesc);
 		SubcommandData remove = new SubcommandData("remove", en.whitelistRemoveDescription())
 			.setDescriptionLocalizations(removeDesc)
-			.addOptions(removePlayerOpt);
+			.addOptions(new OptionData(OptionType.STRING, "player", en.playerOption(), true)
+				.setDescriptionLocalizations(playerOpt));
 		SubcommandData on = new SubcommandData("on", en.whitelistOnDescription())
 			.setDescriptionLocalizations(onDesc);
 		SubcommandData off = new SubcommandData("off", en.whitelistOffDescription())
@@ -57,7 +57,17 @@ public final class CommandLocales {
 			.setDescriptionLocalizations(wlDesc)
 			.addSubcommands(add, reload, remove, on, off);
 
-		return List.of(list, whitelist);
+		SlashCommandData ban = Commands.slash("ban", en.banDescription())
+			.setDescriptionLocalizations(banDesc)
+			.addOptions(new OptionData(OptionType.STRING, "player", en.playerOption(), true)
+				.setDescriptionLocalizations(playerOpt));
+
+		SlashCommandData unban = Commands.slash("unban", en.unbanDescription())
+			.setDescriptionLocalizations(unbanDesc)
+			.addOptions(new OptionData(OptionType.STRING, "player", en.playerOption(), true)
+				.setDescriptionLocalizations(playerOpt));
+
+		return List.of(list, whitelist, ban, unban);
 	}
 
 	private static Map<DiscordLocale, String> map(java.util.function.Function<CommandLocale, String> getter) {
