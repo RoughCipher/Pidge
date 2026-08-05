@@ -130,9 +130,18 @@ public abstract class BaseChatRelay {
 		sendRaw(MessageUtils.withIcon(MessageConfig.getStartIcon(), text), "start");
 	}
 
-	public void sendServerSleepMessage() {
+	public void sendServerSleepMessage(String sleeperNames) {
 		if (!MessageConfig.isNightSkippedEnabled()) return;
-		String text = MessageConfig.getNightSkipped();
+		String text;
+		if (MessageConfig.getNightSkipped() != null) {
+			String custom = MessageConfig.getNightSkipped();
+			text = custom.contains("%s")
+				? String.format(custom, sleeperNames != null ? sleeperNames : "")
+				: custom;
+		} else {
+			String pattern = I18n.getInstance().translateKey("messages.sleep.succeed");
+			text = String.format(pattern, sleeperNames != null ? sleeperNames : "");
+		}
 		sendRaw(MessageUtils.withIcon(MessageConfig.getNightSkippedIcon(), text), "sleep");
 	}
 }
