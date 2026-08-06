@@ -1,4 +1,4 @@
-package ru.roughcipher.pidge.discord.locale;
+package ru.roughcipher.pidge.locale;
 
 import net.dv8tion.jda.api.interactions.DiscordLocale;
 
@@ -8,8 +8,13 @@ public final class EnglishLocale implements CommandLocale {
 	private EnglishLocale() {}
 
 	@Override
-	public DiscordLocale locale() {
+	public DiscordLocale discordLocale() {
 		return DiscordLocale.ENGLISH_US;
+	}
+
+	@Override
+	public String languageCode() {
+		return "en";
 	}
 
 	@Override
@@ -49,12 +54,12 @@ public final class EnglishLocale implements CommandLocale {
 
 	@Override
 	public String banDescription() {
-		return "Ban a player";
+		return "Ban a player by username";
 	}
 
 	@Override
 	public String unbanDescription() {
-		return "Unban a player";
+		return "Unban a player by username";
 	}
 
 	@Override

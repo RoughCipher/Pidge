@@ -1,9 +1,11 @@
-package ru.roughcipher.pidge.discord.locale;
+package ru.roughcipher.pidge.locale;
 
 import net.dv8tion.jda.api.interactions.DiscordLocale;
 
 public interface CommandLocale {
-	DiscordLocale locale();
+	DiscordLocale discordLocale();
+
+	String languageCode();
 
 	String listDescription();
 
@@ -25,6 +27,5 @@ public interface CommandLocale {
 
 	String playerOption();
 
-	// backend ely|mojang (bweb)
 	String backendOption();
 }

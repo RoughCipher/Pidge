@@ -22,7 +22,7 @@ import ru.roughcipher.pidge.util.BaseChatRelay;
 import ru.roughcipher.pidge.util.MessageUtils;
 import ru.roughcipher.pidge.util.AdminCommands;
 import ru.roughcipher.pidge.util.ProxyUtils;
-import ru.roughcipher.pidge.discord.locale.CommandLocales;
+import ru.roughcipher.pidge.locale.CommandLocales;
 
 import okhttp3.OkHttpClient;
 
@@ -73,7 +73,7 @@ public class DiscordClient {
 			if (ch != null) {
 				Guild guild = ch.getGuild();
 				guild.updateCommands()
-					.addCommands(CommandLocales.buildCommands())
+					.addCommands(CommandLocales.buildDiscordCommands())
 					.queue(
 						success -> Pidge.LOGGER.info("Registered {} commands on guild {}", success.size(), guild.getName()),
 						failure -> Pidge.LOGGER.error("Failed to register commands on guild", failure)

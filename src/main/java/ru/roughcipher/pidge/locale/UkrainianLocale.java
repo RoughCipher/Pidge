@@ -1,4 +1,4 @@
-package ru.roughcipher.pidge.discord.locale;
+package ru.roughcipher.pidge.locale;
 
 import net.dv8tion.jda.api.interactions.DiscordLocale;
 
@@ -8,8 +8,13 @@ public final class UkrainianLocale implements CommandLocale {
 	private UkrainianLocale() {}
 
 	@Override
-	public DiscordLocale locale() {
+	public DiscordLocale discordLocale() {
 		return DiscordLocale.UKRAINIAN;
+	}
+
+	@Override
+	public String languageCode() {
+		return "uk";
 	}
 
 	@Override
