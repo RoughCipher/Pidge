@@ -54,12 +54,12 @@ public final class EnglishLocale implements CommandLocale {
 
 	@Override
 	public String banDescription() {
-		return "Ban a player by username";
+		return "Ban a player";
 	}
 
 	@Override
 	public String unbanDescription() {
-		return "Unban a player by username";
+		return "Unban a player";
 	}
 
 	@Override

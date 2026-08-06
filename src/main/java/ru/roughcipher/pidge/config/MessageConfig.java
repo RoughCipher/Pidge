@@ -18,7 +18,6 @@ public class MessageConfig {
 	private static String playerJoined = null;
 	private static String playerLeft = null;
 	private static String playerKicked = null;
-	private static String serverStart = "Server started!";
 	private static String serverStop = null;
 	private static String nightSkipped = null;
 
@@ -57,7 +56,6 @@ public class MessageConfig {
 		try (FileReader reader = new FileReader(file)) {
 			MessageData data = GSON.fromJson(reader, MessageData.class);
 			if (data != null) {
-				if (data.server_start != null) serverStart = data.server_start;
 				if (data.server_stop != null) serverStop = data.server_stop.isEmpty() ? null : data.server_stop;
 				if (data.night_skipped != null) nightSkipped = data.night_skipped.isEmpty() ? null : data.night_skipped;
 				if (data.player_joined != null) playerJoined = data.player_joined.isEmpty() ? null : data.player_joined;
@@ -92,7 +90,6 @@ public class MessageConfig {
 
 	public static void save() {
 		MessageData data = new MessageData();
-		data.server_start = serverStart;
 		data.server_stop = serverStop == null ? "" : serverStop;
 		data.night_skipped = nightSkipped == null ? "" : nightSkipped;
 		data.player_joined = playerJoined == null ? "" : playerJoined;
@@ -136,7 +133,6 @@ public class MessageConfig {
 	public static String getPlayerJoined() { return playerJoined; }
 	public static String getPlayerLeft() { return playerLeft; }
 	public static String getPlayerKicked() { return playerKicked; }
-	public static String getServerStart() { return serverStart; }
 	public static String getServerStop() { return serverStop; }
 	public static String getNightSkipped() { return nightSkipped; }
 
@@ -162,7 +158,7 @@ public class MessageConfig {
 	public static boolean isMeEnabled() { return enableMe; }
 
 	public static void printConfigValues() {
-		Pidge.info("server_start = " + serverStart + " (enabled=" + enableServerStart + ")");
+		Pidge.info("server_start enabled = " + enableServerStart);
 		Pidge.info("server_stop = " + (serverStop == null ? "(use default)" : serverStop) + " (enabled=" + enableServerStop + ")");
 		Pidge.info("night_skipped = " + (nightSkipped == null ? "(use default)" : nightSkipped) + " (enabled=" + enableNightSkipped + ")");
 		Pidge.info("player_joined = " + (playerJoined == null ? "(use default)" : playerJoined) + " (enabled=" + enablePlayerJoined + ")");
@@ -187,7 +183,6 @@ public class MessageConfig {
 		String player_joined;
 		String player_left;
 		String player_kicked;
-		String server_start;
 		String server_stop;
 		String night_skipped;
 		String start_icon;
