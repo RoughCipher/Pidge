@@ -18,7 +18,8 @@ public final class CommandLocales {
 
 	public static final List<CommandLocale> ALL = List.of(
 		EnglishLocale.INSTANCE,
-		RussianLocale.INSTANCE
+		RussianLocale.INSTANCE,
+		UkrainianLocale.INSTANCE
 	);
 
 	public static List<SlashCommandData> buildCommands() {
