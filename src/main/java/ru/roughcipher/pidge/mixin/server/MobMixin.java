@@ -21,6 +21,11 @@ public abstract class MobMixin {
 
 		boolean isPlayer = self instanceof Player;
 		String key = self.getDeathMessageKey(entityKilledBy);
+		if (isPlayer
+			&& entityKilledBy instanceof Player
+			&& "messages.death.player.generic".equals(key)) {
+			key = "messages.death.player.killed_by";
+		}
 		Object[] args;
 		if (entityKilledBy != null) {
 			args = new String[]{
