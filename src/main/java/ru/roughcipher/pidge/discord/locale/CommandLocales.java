@@ -1,11 +1,13 @@
 package ru.roughcipher.pidge.discord.locale;
 
 import net.dv8tion.jda.api.interactions.DiscordLocale;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import ru.roughcipher.pidge.util.BwebCompat;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +23,7 @@ public final class CommandLocales {
 
 	public static List<SlashCommandData> buildCommands() {
 		EnglishLocale en = EnglishLocale.INSTANCE;
+		boolean bweb = BwebCompat.isLoaded();
 
 		Map<DiscordLocale, String> listDesc = map(CommandLocale::listDescription);
 		Map<DiscordLocale, String> wlDesc = map(CommandLocale::whitelistDescription);
@@ -32,26 +35,28 @@ public final class CommandLocales {
 		Map<DiscordLocale, String> banDesc = map(CommandLocale::banDescription);
 		Map<DiscordLocale, String> unbanDesc = map(CommandLocale::unbanDescription);
 		Map<DiscordLocale, String> playerOpt = map(CommandLocale::playerOption);
+		Map<DiscordLocale, String> backendOpt = map(CommandLocale::backendOption);
 
 		SlashCommandData list = Commands.slash("list", en.listDescription())
 			.setDescriptionLocalizations(listDesc);
 
-		OptionData playerOption = new OptionData(OptionType.STRING, "player", en.playerOption(), true)
-			.setDescriptionLocalizations(playerOpt);
-
 		SubcommandData add = new SubcommandData("add", en.whitelistAddDescription())
 			.setDescriptionLocalizations(addDesc)
-			.addOptions(playerOption);
+			.addOptions(playerOption(en, playerOpt));
 		SubcommandData reload = new SubcommandData("reload", en.whitelistReloadDescription())
 			.setDescriptionLocalizations(reloadDesc);
 		SubcommandData remove = new SubcommandData("remove", en.whitelistRemoveDescription())
 			.setDescriptionLocalizations(removeDesc)
-			.addOptions(new OptionData(OptionType.STRING, "player", en.playerOption(), true)
-				.setDescriptionLocalizations(playerOpt));
+			.addOptions(playerOption(en, playerOpt));
 		SubcommandData on = new SubcommandData("on", en.whitelistOnDescription())
 			.setDescriptionLocalizations(onDesc);
 		SubcommandData off = new SubcommandData("off", en.whitelistOffDescription())
 			.setDescriptionLocalizations(offDesc);
+
+		if (bweb) {
+			add.addOptions(backendOption(en, backendOpt));
+			remove.addOptions(backendOption(en, backendOpt));
+		}
 
 		SlashCommandData whitelist = Commands.slash("whitelist", en.whitelistDescription())
 			.setDescriptionLocalizations(wlDesc)
@@ -59,15 +64,31 @@ public final class CommandLocales {
 
 		SlashCommandData ban = Commands.slash("ban", en.banDescription())
 			.setDescriptionLocalizations(banDesc)
-			.addOptions(new OptionData(OptionType.STRING, "player", en.playerOption(), true)
-				.setDescriptionLocalizations(playerOpt));
-
+			.addOptions(playerOption(en, playerOpt));
 		SlashCommandData unban = Commands.slash("unban", en.unbanDescription())
 			.setDescriptionLocalizations(unbanDesc)
-			.addOptions(new OptionData(OptionType.STRING, "player", en.playerOption(), true)
-				.setDescriptionLocalizations(playerOpt));
+			.addOptions(playerOption(en, playerOpt));
+
+		if (bweb) {
+			ban.addOptions(backendOption(en, backendOpt));
+			unban.addOptions(backendOption(en, backendOpt));
+		}
 
 		return List.of(list, whitelist, ban, unban);
+	}
+
+	private static OptionData playerOption(EnglishLocale en, Map<DiscordLocale, String> locs) {
+		return new OptionData(OptionType.STRING, "player", en.playerOption(), true)
+			.setDescriptionLocalizations(locs);
+	}
+
+	private static OptionData backendOption(EnglishLocale en, Map<DiscordLocale, String> locs) {
+		return new OptionData(OptionType.STRING, "backend", en.backendOption(), false)
+			.setDescriptionLocalizations(locs)
+			.addChoices(
+				new Command.Choice("ely", "ely"),
+				new Command.Choice("mojang", "mojang")
+			);
 	}
 
 	private static Map<DiscordLocale, String> map(java.util.function.Function<CommandLocale, String> getter) {

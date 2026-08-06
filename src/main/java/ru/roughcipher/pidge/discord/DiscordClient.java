@@ -12,9 +12,7 @@ import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.minecraft.core.lang.I18n;
 import net.minecraft.core.net.ChatEmotes;
-import net.minecraft.core.util.helper.UUIDHelper;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.entity.player.PlayerServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.roughcipher.pidge.Pidge;
@@ -22,6 +20,7 @@ import ru.roughcipher.pidge.config.PidgeConfig;
 import ru.roughcipher.pidge.telegram.TelegramChatRelay;
 import ru.roughcipher.pidge.util.BaseChatRelay;
 import ru.roughcipher.pidge.util.MessageUtils;
+import ru.roughcipher.pidge.util.AdminCommands;
 import ru.roughcipher.pidge.util.ProxyUtils;
 import ru.roughcipher.pidge.discord.locale.CommandLocales;
 
@@ -156,7 +155,7 @@ public class DiscordClient {
 										.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
 										.setEphemeral(true)
 										.queue();
-									return;
+									break;
 								}
 								String playerName = option.getAsString();
 								if (playerName.length() > 16) {
@@ -164,47 +163,11 @@ public class DiscordClient {
 										.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
 										.setEphemeral(true)
 										.queue();
-									return;
+									break;
 								}
-								String authorName = slash.getUser().getName() + " (" + authorId + ")";
-								Pidge.LOGGER.info("Discord /whitelist add {} requested by {}", playerName, authorName);
-
-								PlayerServer player = server.playerList.getPlayerEntity(playerName);
-								if (player != null) {
-									server.playerList.addToWhiteList(player.uuid);
-									String successMsg = I18n.getInstance().translateKeyAndFormat("command.commands.whitelist.add.success", playerName);
-									Pidge.LOGGER.info("Discord /whitelist add {} succeeded (online)", playerName);
-									slash.reply(MessageUtils.escapeDiscordMarkdown(successMsg))
-										.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-										.queue();
-								} else {
-									try {
-										UUIDHelper.runConversionAction(playerName,
-											(uuid) -> {
-												server.playerList.addToWhiteList(uuid);
-												String successMsg2 = I18n.getInstance().translateKeyAndFormat("command.commands.whitelist.add.success", playerName);
-												Pidge.LOGGER.info("Discord /whitelist add {} succeeded (offline)", playerName);
-												slash.reply(MessageUtils.escapeDiscordMarkdown(successMsg2))
-													.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-													.queue();
-											},
-											(username) -> {
-												String failMsg = I18n.getInstance().translateKeyAndFormat("command.commands.whitelist.add.fail.wrong_name", username);
-												Pidge.LOGGER.warn("Discord /whitelist add {} failed: wrong name", playerName);
-												slash.reply(MessageUtils.escapeDiscordMarkdown(failMsg))
-													.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-													.setEphemeral(true)
-													.queue();
-											}
-										);
-									} catch (Exception e) {
-										Pidge.LOGGER.error("Discord /whitelist add {} failed with exception", playerName, e);
-										slash.reply(MessageUtils.escapeDiscordMarkdown("Failed to add player: " + e.getMessage()))
-											.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-											.setEphemeral(true)
-											.queue();
-									}
-								}
+								String backend = slashBackend(slash);
+								Pidge.LOGGER.info("Discord /whitelist add {} {} by {}", playerName, backend, slash.getUser().getName());
+								AdminCommands.whitelistAdd(playerName, backend, slashReply(slash));
 								break;
 							}
 							case "reload": {
@@ -232,7 +195,7 @@ public class DiscordClient {
 										.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
 										.setEphemeral(true)
 										.queue();
-									return;
+									break;
 								}
 								String playerName = option.getAsString();
 								if (playerName.length() > 16) {
@@ -240,47 +203,11 @@ public class DiscordClient {
 										.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
 										.setEphemeral(true)
 										.queue();
-									return;
+									break;
 								}
-								String authorName = slash.getUser().getName() + " (" + authorId + ")";
-								Pidge.LOGGER.info("Discord /whitelist remove {} requested by {}", playerName, authorName);
-
-								PlayerServer player = server.playerList.getPlayerEntity(playerName);
-								if (player != null) {
-									server.playerList.removeFromWhiteList(player.uuid);
-									String successMsg = I18n.getInstance().translateKeyAndFormat("command.commands.whitelist.remove.success", playerName);
-									Pidge.LOGGER.info("Discord /whitelist remove {} succeeded (online)", playerName);
-									slash.reply(MessageUtils.escapeDiscordMarkdown(successMsg))
-										.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-										.queue();
-								} else {
-									try {
-										UUIDHelper.runConversionAction(playerName,
-											(uuid) -> {
-												server.playerList.removeFromWhiteList(uuid);
-												String successMsg2 = I18n.getInstance().translateKeyAndFormat("command.commands.whitelist.remove.success", playerName);
-												Pidge.LOGGER.info("Discord /whitelist remove {} succeeded (offline)", playerName);
-												slash.reply(MessageUtils.escapeDiscordMarkdown(successMsg2))
-													.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-													.queue();
-											},
-											(username) -> {
-												String failMsg = I18n.getInstance().translateKeyAndFormat("command.commands.whitelist.remove.fail.wrong_name", username);
-												Pidge.LOGGER.warn("Discord /whitelist remove {} failed: wrong name", playerName);
-												slash.reply(MessageUtils.escapeDiscordMarkdown(failMsg))
-													.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-													.setEphemeral(true)
-													.queue();
-											}
-										);
-									} catch (Exception e) {
-										Pidge.LOGGER.error("Discord /whitelist remove {} failed with exception", playerName, e);
-										slash.reply(MessageUtils.escapeDiscordMarkdown("Failed to remove player: " + e.getMessage()))
-											.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-											.setEphemeral(true)
-											.queue();
-									}
-								}
+								String backend = slashBackend(slash);
+								Pidge.LOGGER.info("Discord /whitelist remove {} {} by {}", playerName, backend, slash.getUser().getName());
+								AdminCommands.whitelistRemove(playerName, backend, slashReply(slash));
 								break;
 							}
 							case "on": {
@@ -317,15 +244,6 @@ public class DiscordClient {
 								.queue();
 							return;
 						}
-						MinecraftServer server = MinecraftServer.getInstance();
-						if (server == null || server.playerList == null) {
-							Pidge.LOGGER.error("Discord /ban failed: server not ready");
-							slash.reply(MessageUtils.escapeDiscordMarkdown("Server not ready."))
-								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-								.setEphemeral(true)
-								.queue();
-							return;
-						}
 						var option = slash.getOption("player");
 						if (option == null) {
 							slash.reply(MessageUtils.escapeDiscordMarkdown("Please specify a player name."))
@@ -342,48 +260,9 @@ public class DiscordClient {
 								.queue();
 							return;
 						}
-						String authorName = slash.getUser().getName() + " (" + authorId + ")";
-						Pidge.LOGGER.info("Discord /ban {} requested by {}", playerName, authorName);
-
-						PlayerServer player = server.playerList.getPlayerEntity(playerName);
-						if (player != null) {
-							server.playerList.banPlayer(player.uuid);
-							player.playerNetServerHandler.kickPlayer("Banned by admin");
-							String successMsg = I18n.getInstance().translateKeyAndFormat("command.commands.ban.success", player.username);
-							Pidge.LOGGER.info("Discord /ban {} succeeded (online)", playerName);
-							slash.reply(MessageUtils.escapeDiscordMarkdown(successMsg))
-								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-								.queue();
-						} else {
-							try {
-								UUIDHelper.runConversionAction(playerName,
-									(uuid) -> {
-										server.playerList.banPlayer(uuid);
-										String successMsg2 = I18n.getInstance().translateKeyAndFormat(
-											"command.commands.ban.username.success", playerName);
-										Pidge.LOGGER.info("Discord /ban {} succeeded (offline)", playerName);
-										slash.reply(MessageUtils.escapeDiscordMarkdown(successMsg2))
-											.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-											.queue();
-									},
-									(username) -> {
-										String failMsg = I18n.getInstance().translateKeyAndFormat(
-											"command.commands.ban.username.fail.wrong_name", playerName);
-										Pidge.LOGGER.warn("Discord /ban {} failed: wrong name", playerName);
-										slash.reply(MessageUtils.escapeDiscordMarkdown(failMsg))
-											.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-											.setEphemeral(true)
-											.queue();
-									}
-								);
-							} catch (Exception e) {
-								Pidge.LOGGER.error("Discord /ban {} failed with exception", playerName, e);
-								slash.reply(MessageUtils.escapeDiscordMarkdown("Failed to ban player: " + e.getMessage()))
-									.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-									.setEphemeral(true)
-									.queue();
-							}
-						}
+						String backend = slashBackend(slash);
+						Pidge.LOGGER.info("Discord /ban {} {} by {}", playerName, backend, slash.getUser().getName());
+						AdminCommands.ban(playerName, backend, slashReply(slash));
 						return;
 					}
 					case "unban": {
@@ -396,15 +275,6 @@ public class DiscordClient {
 								.queue();
 							return;
 						}
-						MinecraftServer server = MinecraftServer.getInstance();
-						if (server == null || server.playerList == null) {
-							Pidge.LOGGER.error("Discord /unban failed: server not ready");
-							slash.reply(MessageUtils.escapeDiscordMarkdown("Server not ready."))
-								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-								.setEphemeral(true)
-								.queue();
-							return;
-						}
 						var option = slash.getOption("player");
 						if (option == null) {
 							slash.reply(MessageUtils.escapeDiscordMarkdown("Please specify a player name."))
@@ -421,37 +291,9 @@ public class DiscordClient {
 								.queue();
 							return;
 						}
-						String authorName = slash.getUser().getName() + " (" + authorId + ")";
-						Pidge.LOGGER.info("Discord /unban {} requested by {}", playerName, authorName);
-
-						try {
-							UUIDHelper.runConversionAction(playerName,
-								(uuid) -> {
-									server.playerList.pardonPlayer(uuid);
-									String successMsg = I18n.getInstance().translateKeyAndFormat(
-										"command.commands.unban.username.success", playerName);
-									Pidge.LOGGER.info("Discord /unban {} succeeded", playerName);
-									slash.reply(MessageUtils.escapeDiscordMarkdown(successMsg))
-										.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-										.queue();
-								},
-								(username) -> {
-									String failMsg = I18n.getInstance().translateKeyAndFormat(
-										"command.commands.unban.username.fail.wrong_name", playerName);
-									Pidge.LOGGER.warn("Discord /unban {} failed: wrong name", playerName);
-									slash.reply(MessageUtils.escapeDiscordMarkdown(failMsg))
-										.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-										.setEphemeral(true)
-										.queue();
-								}
-							);
-						} catch (Exception e) {
-							Pidge.LOGGER.error("Discord /unban {} failed with exception", playerName, e);
-							slash.reply(MessageUtils.escapeDiscordMarkdown("Failed to unban player: " + e.getMessage()))
-								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-								.setEphemeral(true)
-								.queue();
-						}
+						String backend = slashBackend(slash);
+						Pidge.LOGGER.info("Discord /unban {} {} by {}", playerName, backend, slash.getUser().getName());
+						AdminCommands.unban(playerName, backend, slashReply(slash));
 						return;
 					}
 				}
@@ -517,7 +359,7 @@ public class DiscordClient {
 				}
 				String[] parts = raw.split(" ");
 				if (parts.length < 3) {
-					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Usage: /whitelist add <player>"))
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Usage: /whitelist add <player> [ely|mojang]"))
 						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
 						.queue();
 					return;
@@ -529,7 +371,8 @@ public class DiscordClient {
 						.queue();
 					return;
 				}
-				handleWhitelistAdd(msg, playerName);
+				String backend = AdminCommands.parseBackendArg(parts, 3);
+				handleWhitelistAdd(msg, playerName, backend);
 				return;
 			}
 
@@ -578,7 +421,7 @@ public class DiscordClient {
 				}
 				String[] parts = raw.split(" ");
 				if (parts.length < 3) {
-					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Usage: /whitelist remove <player>"))
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Usage: /whitelist remove <player> [ely|mojang]"))
 						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
 						.queue();
 					return;
@@ -590,7 +433,8 @@ public class DiscordClient {
 						.queue();
 					return;
 				}
-				handleWhitelistRemove(msg, playerName);
+				String backend = AdminCommands.parseBackendArg(parts, 3);
+				handleWhitelistRemove(msg, playerName, backend);
 				return;
 			}
 
@@ -605,7 +449,7 @@ public class DiscordClient {
 				}
 				String[] parts = raw.split(" ");
 				if (parts.length < 2) {
-					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Usage: /ban <player>"))
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Usage: /ban <player> [ely|mojang]"))
 						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
 						.queue();
 					return;
@@ -617,8 +461,9 @@ public class DiscordClient {
 						.queue();
 					return;
 				}
-				Pidge.LOGGER.info("Discord text /ban {} requested by {} ({})", playerName, msg.getAuthor().getName(), authorId);
-				handleBan(msg, playerName);
+				String backend = AdminCommands.parseBackendArg(parts, 2);
+				Pidge.LOGGER.info("Discord text /ban {} {} requested by {} ({})", playerName, backend, msg.getAuthor().getName(), authorId);
+				handleBan(msg, playerName, backend);
 				return;
 			}
 
@@ -633,7 +478,7 @@ public class DiscordClient {
 				}
 				String[] parts = raw.split(" ");
 				if (parts.length < 2) {
-					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Usage: /unban <player>"))
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Usage: /unban <player> [ely|mojang]"))
 						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
 						.queue();
 					return;
@@ -645,8 +490,9 @@ public class DiscordClient {
 						.queue();
 					return;
 				}
-				Pidge.LOGGER.info("Discord text /unban {} requested by {} ({})", playerName, msg.getAuthor().getName(), authorId);
-				handleUnban(msg, playerName);
+				String backend = AdminCommands.parseBackendArg(parts, 2);
+				Pidge.LOGGER.info("Discord text /unban {} {} requested by {} ({})", playerName, backend, msg.getAuthor().getName(), authorId);
+				handleUnban(msg, playerName, backend);
 				return;
 			}
 
@@ -656,167 +502,61 @@ public class DiscordClient {
 			TelegramChatRelay.INSTANCE.sendToTelegram("[D] " + author, content);
 		}
 
-		private void handleWhitelistAdd(MessageReceivedEvent msg, String playerName) {
-			MinecraftServer server = MinecraftServer.getInstance();
-			if (server == null || server.playerList == null) {
-				msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Server not ready."))
-					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-					.queue();
-				return;
-			}
-			PlayerServer player = server.playerList.getPlayerEntity(playerName);
-			if (player != null) {
-				server.playerList.addToWhiteList(player.uuid);
-				String successMsg = I18n.getInstance().translateKeyAndFormat("command.commands.whitelist.add.success", playerName);
-				msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(successMsg))
-					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-					.queue();
-			} else {
-				try {
-					UUIDHelper.runConversionAction(playerName,
-						(uuid) -> {
-							server.playerList.addToWhiteList(uuid);
-							String successMsg2 = I18n.getInstance().translateKeyAndFormat("command.commands.whitelist.add.success", playerName);
-							msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(successMsg2))
-								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-								.queue();
-						},
-						(username) -> {
-							String failMsg = I18n.getInstance().translateKeyAndFormat("command.commands.whitelist.add.fail.wrong_name", username);
-							msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(failMsg))
-								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-								.queue();
-						}
-					);
-				} catch (Exception e) {
-					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Failed to add player: " + e.getMessage()))
+		private static AdminCommands.Reply slashReply(SlashCommandInteractionEvent slash) {
+			return new AdminCommands.Reply() {
+				@Override
+				public void success(String message) {
+					slash.reply(MessageUtils.escapeDiscordMarkdown(message))
 						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
 						.queue();
 				}
-			}
+				@Override
+				public void failure(String message) {
+					slash.reply(MessageUtils.escapeDiscordMarkdown(message))
+						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
+						.setEphemeral(true)
+						.queue();
+				}
+			};
 		}
 
-		private void handleWhitelistRemove(MessageReceivedEvent msg, String playerName) {
-			MinecraftServer server = MinecraftServer.getInstance();
-			if (server == null || server.playerList == null) {
-				msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Server not ready."))
-					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-					.queue();
-				return;
-			}
-			PlayerServer player = server.playerList.getPlayerEntity(playerName);
-			if (player != null) {
-				server.playerList.removeFromWhiteList(player.uuid);
-				String successMsg = I18n.getInstance().translateKeyAndFormat("command.commands.whitelist.remove.success", playerName);
-				msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(successMsg))
-					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-					.queue();
-			} else {
-				try {
-					UUIDHelper.runConversionAction(playerName,
-						(uuid) -> {
-							server.playerList.removeFromWhiteList(uuid);
-							String successMsg2 = I18n.getInstance().translateKeyAndFormat("command.commands.whitelist.remove.success", playerName);
-							msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(successMsg2))
-								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-								.queue();
-						},
-						(username) -> {
-							String failMsg = I18n.getInstance().translateKeyAndFormat("command.commands.whitelist.remove.fail.wrong_name", username);
-							msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(failMsg))
-								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-								.queue();
-						}
-					);
-				} catch (Exception e) {
-					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Failed to remove player: " + e.getMessage()))
+		private static AdminCommands.Reply textReply(MessageReceivedEvent msg) {
+			return new AdminCommands.Reply() {
+				@Override
+				public void success(String message) {
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(message))
 						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
 						.queue();
 				}
-			}
-		}
-
-		private void handleBan(MessageReceivedEvent msg, String playerName) {
-			MinecraftServer server = MinecraftServer.getInstance();
-			if (server == null || server.playerList == null) {
-				msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Server not ready."))
-					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-					.queue();
-				return;
-			}
-			PlayerServer player = server.playerList.getPlayerEntity(playerName);
-			if (player != null) {
-				server.playerList.banPlayer(player.uuid);
-				player.playerNetServerHandler.kickPlayer("Banned by admin");
-				String successMsg = I18n.getInstance().translateKeyAndFormat("command.commands.ban.success", player.username);
-				Pidge.LOGGER.info("Discord text /ban {} succeeded (online)", playerName);
-				msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(successMsg))
-					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-					.queue();
-			} else {
-				try {
-					UUIDHelper.runConversionAction(playerName,
-						(uuid) -> {
-							server.playerList.banPlayer(uuid);
-							String successMsg2 = I18n.getInstance().translateKeyAndFormat(
-								"command.commands.ban.username.success", playerName);
-							Pidge.LOGGER.info("Discord text /ban {} succeeded (offline)", playerName);
-							msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(successMsg2))
-								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-								.queue();
-						},
-						(username) -> {
-							String failMsg = I18n.getInstance().translateKeyAndFormat(
-								"command.commands.ban.username.fail.wrong_name", playerName);
-							Pidge.LOGGER.warn("Discord text /ban {} failed: wrong name", playerName);
-							msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(failMsg))
-								.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-								.queue();
-						}
-					);
-				} catch (Exception e) {
-					Pidge.LOGGER.error("Discord text /ban {} failed with exception", playerName, e);
-					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Failed to ban player: " + e.getMessage()))
+				@Override
+				public void failure(String message) {
+					msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(message))
 						.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
 						.queue();
 				}
-			}
+			};
 		}
 
-		private void handleUnban(MessageReceivedEvent msg, String playerName) {
-			MinecraftServer server = MinecraftServer.getInstance();
-			if (server == null || server.playerList == null) {
-				msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Server not ready."))
-					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-					.queue();
-				return;
-			}
-			try {
-				UUIDHelper.runConversionAction(playerName,
-					(uuid) -> {
-						server.playerList.pardonPlayer(uuid);
-						String successMsg = I18n.getInstance().translateKeyAndFormat(
-							"command.commands.unban.username.success", playerName);
-						Pidge.LOGGER.info("Discord text /unban {} succeeded", playerName);
-						msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(successMsg))
-							.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-							.queue();
-					},
-					(username) -> {
-						String failMsg = I18n.getInstance().translateKeyAndFormat(
-							"command.commands.unban.username.fail.wrong_name", playerName);
-						Pidge.LOGGER.warn("Discord text /unban {} failed: wrong name", playerName);
-						msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown(failMsg))
-							.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-							.queue();
-					}
-				);
-			} catch (Exception e) {
-				Pidge.LOGGER.error("Discord text /unban {} failed with exception", playerName, e);
-				msg.getChannel().sendMessage(MessageUtils.escapeDiscordMarkdown("Failed to unban player: " + e.getMessage()))
-					.setAllowedMentions(EnumSet.noneOf(Message.MentionType.class))
-					.queue();
-			}
+		@Nullable
+		private static String slashBackend(SlashCommandInteractionEvent slash) {
+			var opt = slash.getOption("backend");
+			return opt != null ? opt.getAsString() : null;
+		}
+
+		private void handleWhitelistAdd(MessageReceivedEvent msg, String playerName, String backend) {
+			AdminCommands.whitelistAdd(playerName, backend, textReply(msg));
+		}
+
+		private void handleWhitelistRemove(MessageReceivedEvent msg, String playerName, String backend) {
+			AdminCommands.whitelistRemove(playerName, backend, textReply(msg));
+		}
+
+		private void handleBan(MessageReceivedEvent msg, String playerName, String backend) {
+			AdminCommands.ban(playerName, backend, textReply(msg));
+		}
+
+		private void handleUnban(MessageReceivedEvent msg, String playerName, String backend) {
+			AdminCommands.unban(playerName, backend, textReply(msg));
 		}
 	}
 }

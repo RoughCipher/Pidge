@@ -61,4 +61,9 @@ public final class EnglishLocale implements CommandLocale {
 	public String playerOption() {
 		return "Player name";
 	}
+
+	@Override
+	public String backendOption() {
+		return "Auth backend (ely or mojang)";
+	}
 }

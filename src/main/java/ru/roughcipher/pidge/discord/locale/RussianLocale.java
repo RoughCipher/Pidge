@@ -61,4 +61,9 @@ public final class RussianLocale implements CommandLocale {
 	public String playerOption() {
 		return "Имя игрока";
 	}
+
+	@Override
+	public String backendOption() {
+		return "Бэкенд авторизации (ely или mojang)";
+	}
 }

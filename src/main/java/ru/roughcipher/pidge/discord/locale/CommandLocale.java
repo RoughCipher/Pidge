@@ -24,4 +24,7 @@ public interface CommandLocale {
 	String unbanDescription();
 
 	String playerOption();
+
+	// backend ely|mojang (bweb)
+	String backendOption();
 }
