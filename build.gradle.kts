@@ -6,11 +6,8 @@ import java.util.TimeZone
 plugins {
 	alias(libs.plugins.loom)
 	alias(libs.plugins.lwjgl)
-    java
+	java
 }
-
-TimeZone.setDefault(TimeZone.getTimeZone("Europe/Moscow"))
-
 val modVersion: Provider<String> = providers.gradleProperty("mod_version")
 val modGroup: Provider<String> = providers.gradleProperty("mod_group")
 val modName: Provider<String> = providers.gradleProperty("mod_name")
@@ -20,39 +17,51 @@ val javaVersion: Provider<Int> = libs.versions.java.map { it.toInt() }
 base.archivesName = modName
 group = modGroup.get()
 val baseVersion = modVersion.get()
-version = "$baseVersion-${SimpleDateFormat("yyyyMMdd").format(Date())}"
+val dateFormat = SimpleDateFormat("yyyyMMdd")
+dateFormat.timeZone = TimeZone.getTimeZone("Europe/Moscow")
+version = "$baseVersion-${dateFormat.format(Date())}"
 loom {
-    customMinecraftMetadata.set("https://downloads.betterthanadventure.net/bta-client/${libs.versions.btaChannel.get()}/${libs.versions.bta.get()}/manifest.json")
+	customMinecraftMetadata.set("https://downloads.betterthanadventure.net/bta-client/${libs.versions.btaChannel.get()}/${libs.versions.bta.get()}/manifest.json")
 }
 repositories {
-    mavenCentral()
-    maven("https://maven.fabricmc.net/") { name = "Fabric" }
-    maven("https://maven.thesignalumproject.net/infrastructure") { name = "SignalumMavenInfrastructure" }
-    maven("https://maven.thesignalumproject.net/releases") { name = "SignalumMavenReleases" }
-	maven("https://maven.thesignalumproject.net/nightly") { name = "SignalumMavenNightly" }
-    ivy("https://github.com/Better-than-Adventure") {
-        patternLayout { artifact("[organisation]/releases/download/[revision]/[module]-bta-[revision].jar") }
-        metadataSources { artifact() }
-    }
-    ivy("https://downloads.betterthanadventure.net/bta-client/${libs.versions.btaChannel.get()}/") {
-        patternLayout { artifact("/v[revision]/client.jar") }
-        metadataSources { artifact() }
-    }
-    ivy("https://downloads.betterthanadventure.net/bta-server/${libs.versions.btaChannel.get()}/") {
-        patternLayout { artifact("/v[revision]/server.jar") }
-        metadataSources { artifact() }
-    }
-    ivy("https://piston-data.mojang.com") {
-        patternLayout { artifact("v1/[organisation]/[revision]/[module].jar") }
-        metadataSources { artifact() }
-    }
+	mavenCentral()
+	maven("https://maven.fabricmc.net/") { name = "Fabric" }
+	// fabric-loader - https://github.com/Turnip-Labs/fabric-loader/releases/download/0.18.4-bta.11/fabric-loader-0.18.4-bta.11.jar
+	ivy("https://github.com/Turnip-Labs") {
+		patternLayout {
+			artifact("/fabric-loader/releases/download/[revision]/fabric-loader-[revision].jar")
+		}
+		metadataSources { artifact() }
+		content { includeGroup("bta.loader") }
+	}
+	// legacy-lwjgl3 - https://github.com/Better-than-Adventure/legacy-lwjgl3/releases/download/1.0.6/legacy-lwjgl3-bta-1.0.6.jar
+	ivy("https://github.com/Better-than-Adventure") {
+		patternLayout {
+			artifact("/[module]/releases/download/[revision]/[module]-bta-[revision].jar")
+			artifact("/[module]/releases/download/[revision]/[module]-[revision].jar")
+		}
+		metadataSources { artifact() }
+		content { includeGroup("legacy-lwjgl3") }
+	}
+	ivy("https://downloads.betterthanadventure.net/bta-client/${libs.versions.btaChannel.get()}/") {
+		patternLayout { artifact("/v[revision]/client.jar") }
+		metadataSources { artifact() }
+	}
+	ivy("https://downloads.betterthanadventure.net/bta-server/${libs.versions.btaChannel.get()}/") {
+		patternLayout { artifact("/v[revision]/server.jar") }
+		metadataSources { artifact() }
+	}
+	ivy("https://piston-data.mojang.com") {
+		patternLayout { artifact("v1/[organisation]/[revision]/[module].jar") }
+		metadataSources { artifact() }
+	}
 }
 lwjgl {
 	version = libs.versions.lwjgl
 	implementation(Preset.MINIMAL_OPENGL)
 }
 dependencies {
-    minecraft("::${libs.versions.bta.get()}")
+	minecraft("::${libs.versions.bta.get()}")
 
 	runtimeOnly(libs.clientJar)
 	implementation(libs.loader)
