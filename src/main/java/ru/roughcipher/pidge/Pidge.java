@@ -4,6 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.roughcipher.pidge.config.PidgeConfig;
+import net.minecraft.core.lang.I18n;
 import ru.roughcipher.pidge.config.MessageConfig;
 import ru.roughcipher.pidge.discord.DiscordChatRelay;
 import ru.roughcipher.pidge.discord.DiscordClient;
@@ -49,7 +50,11 @@ public class Pidge implements ModInitializer {
 
 	public static void sendShutdownMessages() {
 		if (MessageConfig.isServerStopEnabled()) {
-			String stopText = PidgeConfig.getServerName() + "\n" + MessageConfig.getServerStop();
+			String stopMsg = MessageConfig.getServerStop();
+			if (stopMsg == null) {
+				stopMsg = I18n.getInstance().translateKey("command.commands.stop.success");
+			}
+			String stopText = PidgeConfig.getServerName() + "\n" + stopMsg;
 			String finalMessage = MessageUtils.withIcon(MessageConfig.getStopIcon(), stopText);
 
 			var discordChannel = DiscordClient.getChannel();

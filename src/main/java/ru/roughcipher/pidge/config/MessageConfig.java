@@ -19,7 +19,7 @@ public class MessageConfig {
 	private static String playerLeft = null;
 	private static String playerKicked = null;
 	private static String serverStart = "Server started!";
-	private static String serverStop = "Server stopped!";
+	private static String serverStop = null;
 	private static String nightSkipped = null;
 
 	private static String startIcon = "▶";
@@ -58,7 +58,7 @@ public class MessageConfig {
 			MessageData data = GSON.fromJson(reader, MessageData.class);
 			if (data != null) {
 				if (data.server_start != null) serverStart = data.server_start;
-				if (data.server_stop != null) serverStop = data.server_stop;
+				if (data.server_stop != null) serverStop = data.server_stop.isEmpty() ? null : data.server_stop;
 				if (data.night_skipped != null) nightSkipped = data.night_skipped.isEmpty() ? null : data.night_skipped;
 				if (data.player_joined != null) playerJoined = data.player_joined.isEmpty() ? null : data.player_joined;
 				if (data.player_left != null) playerLeft = data.player_left.isEmpty() ? null : data.player_left;
@@ -93,7 +93,7 @@ public class MessageConfig {
 	public static void save() {
 		MessageData data = new MessageData();
 		data.server_start = serverStart;
-		data.server_stop = serverStop;
+		data.server_stop = serverStop == null ? "" : serverStop;
 		data.night_skipped = nightSkipped == null ? "" : nightSkipped;
 		data.player_joined = playerJoined == null ? "" : playerJoined;
 		data.player_left = playerLeft == null ? "" : playerLeft;
@@ -163,7 +163,7 @@ public class MessageConfig {
 
 	public static void printConfigValues() {
 		Pidge.info("server_start = " + serverStart + " (enabled=" + enableServerStart + ")");
-		Pidge.info("server_stop = " + serverStop + " (enabled=" + enableServerStop + ")");
+		Pidge.info("server_stop = " + (serverStop == null ? "(use default)" : serverStop) + " (enabled=" + enableServerStop + ")");
 		Pidge.info("night_skipped = " + (nightSkipped == null ? "(use default)" : nightSkipped) + " (enabled=" + enableNightSkipped + ")");
 		Pidge.info("player_joined = " + (playerJoined == null ? "(use default)" : playerJoined) + " (enabled=" + enablePlayerJoined + ")");
 		Pidge.info("player_left = " + (playerLeft == null ? "(use default)" : playerLeft) + " (enabled=" + enablePlayerLeft + ")");
